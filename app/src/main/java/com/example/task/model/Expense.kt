@@ -1,7 +1,8 @@
 package com.example.task.model
 
 data class Expense(
-    val category: String,
-    val amount: String,
-    val location: String?
+    var id: String = "",
+    var category: String = "",
+    var amount: Double = 0.0,
+    var location: String? = null
 )

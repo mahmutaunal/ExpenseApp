@@ -17,6 +17,14 @@ class ExpenseViewModel : ViewModel() {
     val expenseList: LiveData<List<Expense>>
         get() = _expenseList
 
+    private val _errorMessage = MutableLiveData<String>()
+    val errorMessage: LiveData<String>
+        get() = _errorMessage
+
+    var expenseAmount: String = ""
+    var expenseCategory: String = ""
+    var expenseLocation: String? = null
+
     private val expenseRef = FirebaseDatabase.getInstance().getReference("Expenses")
 
     init {
@@ -35,7 +43,7 @@ class ExpenseViewModel : ViewModel() {
                     }
                 }
 
-                _expenseList.postValue(expenses)
+                _expenseList.value = expenses
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
@@ -43,6 +51,63 @@ class ExpenseViewModel : ViewModel() {
                 MyApplication.showToast("Error!")
             }
         })
+    }
+
+    fun addExpense() {
+        val amount = expenseAmount
+        val category = expenseCategory
+        val location = expenseLocation
+
+        // If amount or category is null, warn the user and do not perform the action
+        if (amount == null || category == null) {
+            setErrorMessage("Amount and Category are required.")
+            return
+        }
+
+        // If amount and category are not empty, perform the conversion
+        val amountValue: Double
+        try {
+            amountValue = amount.toDouble()
+        } catch (e: NumberFormatException) {
+            MyApplication.showToast("Invalid amount.")
+            return
+        }
+
+        // Create expense model
+        val expense = Expense("", category, amountValue, location)
+
+        // Add expense to Firebase
+        val expenseId = expenseRef.push().key
+        expenseId?.let {
+            expense.id = it
+            expenseRef.child(it).setValue(expense)
+                .addOnSuccessListener {
+                    MyApplication.showToast("Expense added successfully.")
+
+                    // If insertion is successful open ListFragment
+                    navigateToExpenseListFragment()
+                }
+                .addOnFailureListener {
+                    MyApplication.showToast("Failed to add expense.")
+                }
+        }
+    }
+
+    // Used to open ExpenseListFragment after expense is added
+    private val _navigateToExpenseListFragment = MutableLiveData<Boolean>()
+    val navigateToExpenseListFragment: LiveData<Boolean>
+        get() = _navigateToExpenseListFragment
+
+    fun onNavigateToExpenseListFragmentComplete() {
+        _navigateToExpenseListFragment.value = false
+    }
+
+    private fun navigateToExpenseListFragment() {
+        _navigateToExpenseListFragment.value = true
+    }
+
+    private fun setErrorMessage(message: String) {
+        _errorMessage.value = message
     }
 
 }

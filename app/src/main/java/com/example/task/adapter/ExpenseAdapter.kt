@@ -7,12 +7,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.task.databinding.ItemExpenseBinding
 import com.example.task.model.Expense
 
-class ExpenseAdapter() :
-    RecyclerView.Adapter<ExpenseAdapter.ViewHolder>() {
+class ExpenseAdapter : RecyclerView.Adapter<ExpenseAdapter.ViewHolder>() {
 
-    private var expenseList = emptyList<Expense>()
+    private var expenseList: List<Expense> = listOf()
 
-    class ViewHolder(private val binding: ItemExpenseBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class ViewHolder(private val binding: ItemExpenseBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+
         fun bind(expense: Expense) {
             binding.expense = expense
             binding.executePendingBindings()
@@ -20,14 +21,17 @@ class ExpenseAdapter() :
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding =
-            ItemExpenseBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding = ItemExpenseBinding.inflate(
+            LayoutInflater.from(parent.context),
+            parent,
+            false
+        )
         return ViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val currentExpense = expenseList[position]
-        holder.bind(currentExpense)
+        val expense = expenseList[position]
+        holder.bind(expense)
     }
 
     override fun getItemCount(): Int {
@@ -39,5 +43,4 @@ class ExpenseAdapter() :
         expenseList = newExpenseList
         notifyDataSetChanged()
     }
-
 }

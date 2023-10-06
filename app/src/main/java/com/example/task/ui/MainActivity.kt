@@ -50,8 +50,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupListExpenseFragment() {
-        binding.fabAdd.visibility = View.VISIBLE
-
         val expenseListFragment = ExpenseListFragment()
         supportFragmentManager.beginTransaction()
             .replace(R.id.nav_host_fragment, expenseListFragment)
@@ -63,6 +61,7 @@ class MainActivity : AppCompatActivity() {
             val expenseAddFragment = ExpenseAddFragment()
             supportFragmentManager.beginTransaction()
                 .replace(R.id.nav_host_fragment, expenseAddFragment)
+                .addToBackStack(null)
                 .commit()
 
             binding.fabAdd.visibility = View.GONE
