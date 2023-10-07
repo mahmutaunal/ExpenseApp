@@ -24,6 +24,8 @@ class ExpenseAddFragment : Fragment() {
 
         binding.viewModel = expenseViewModel
 
+        setupCategoryDropdown()
+
         binding.fabDone.setOnClickListener {
             expenseViewModel.addExpense()
         }
@@ -36,6 +38,15 @@ class ExpenseAddFragment : Fragment() {
         }
 
         return binding.root
+    }
+
+    private fun setupCategoryDropdown() {
+        val autoCompleteTextView = binding.etCategory
+        autoCompleteTextView.setAdapter(expenseViewModel.getCategoriesAdapter(requireContext()))
+        autoCompleteTextView.setOnItemClickListener { _, _, position, _ ->
+            val selectedCategory = autoCompleteTextView.adapter.getItem(position) as String
+            expenseViewModel.setSelectedCategory(selectedCategory)
+        }
     }
 
     private fun openExpenseListFragment() {

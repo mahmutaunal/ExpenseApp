@@ -1,11 +1,14 @@
 package com.example.task.viewmodel
 
+import android.content.Context
 import android.util.Log
+import android.widget.ArrayAdapter
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.task.MyApplication
+import com.example.task.R
 import com.example.task.model.Expense
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -23,14 +26,38 @@ class ExpenseViewModel : ViewModel() {
     val errorMessage: LiveData<String>
         get() = _errorMessage
 
+    private val _categories = MutableLiveData<List<String>>()
+    private val categories: LiveData<List<String>> get() = _categories
+
+    private val _selectedCategory = MutableLiveData<String>()
+    val selectedCategory: LiveData<String> get() = _selectedCategory
+
     var expenseAmount: String = ""
-    var expenseCategory: String = ""
     var expenseLocation: String? = null
 
     private val expenseRef = FirebaseDatabase.getInstance().getReference("Expenses")
 
     init {
         loadExpensesFromFirebase()
+
+        setPredefinedCategories()
+        // Select "Shopping" as default
+        //_selectedCategory.value = "Fuel"
+    }
+
+    private fun setPredefinedCategories() {
+        val predefinedCategories = listOf("Fuel", "Shopping")
+        _categories.value = predefinedCategories
+    }
+
+    fun getCategoriesAdapter(context: Context): ArrayAdapter<String> {
+        val adapter = ArrayAdapter(context, R.layout.categories_dropdown_item, categories.value!!)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        return adapter
+    }
+
+    fun setSelectedCategory(category: String) {
+        _selectedCategory.value = category
     }
 
     private fun loadExpensesFromFirebase() {
@@ -61,11 +88,11 @@ class ExpenseViewModel : ViewModel() {
 
     fun addExpense() {
         val amount = expenseAmount
-        val category = expenseCategory
-        val location = expenseLocation
+        val category = selectedCategory.value
+        var location = expenseLocation
 
         // If amount or category is null, warn the user and do not perform the action
-        if (amount.isEmpty() || category.isEmpty()) {
+        if (amount.isEmpty() || category.isNullOrEmpty()) {
             setErrorMessage("Amount and Category are required.")
             return
         }
@@ -77,6 +104,11 @@ class ExpenseViewModel : ViewModel() {
         } catch (e: NumberFormatException) {
             MyApplication.showToast("Invalid amount.")
             return
+        }
+
+        // If location is empty or null, set it to -
+        if (location.isNullOrEmpty()) {
+            location = "-"
         }
 
         // Create expense model
