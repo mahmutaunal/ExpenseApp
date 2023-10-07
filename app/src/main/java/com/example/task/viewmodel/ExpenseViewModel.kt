@@ -4,12 +4,14 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.task.MyApplication
 import com.example.task.model.Expense
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import kotlinx.coroutines.launch
 
 class ExpenseViewModel : ViewModel() {
 
@@ -32,25 +34,29 @@ class ExpenseViewModel : ViewModel() {
     }
 
     private fun loadExpensesFromFirebase() {
-        expenseRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val expenses = mutableListOf<Expense>()
+        viewModelScope.launch {
 
-                for (snapshot in dataSnapshot.children) {
-                    val expense = snapshot.getValue(Expense::class.java)
-                    expense?.let {
-                        expenses.add(it)
+            expenseRef.addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    val expenses = mutableListOf<Expense>()
+
+                    for (snapshot in dataSnapshot.children) {
+                        val expense = snapshot.getValue(Expense::class.java)
+                        expense?.let {
+                            expenses.add(it)
+                        }
                     }
+
+                    _expenseList.value = expenses
                 }
 
-                _expenseList.value = expenses
-            }
+                override fun onCancelled(databaseError: DatabaseError) {
+                    Log.e("List Error", databaseError.details)
+                    MyApplication.showToast("Error!")
+                }
+            })
 
-            override fun onCancelled(databaseError: DatabaseError) {
-                Log.e("List Error", databaseError.details)
-                MyApplication.showToast("Error!")
-            }
-        })
+        }
     }
 
     fun addExpense() {
@@ -59,7 +65,7 @@ class ExpenseViewModel : ViewModel() {
         val location = expenseLocation
 
         // If amount or category is null, warn the user and do not perform the action
-        if (amount == null || category == null) {
+        if (amount.isEmpty() || category.isEmpty()) {
             setErrorMessage("Amount and Category are required.")
             return
         }

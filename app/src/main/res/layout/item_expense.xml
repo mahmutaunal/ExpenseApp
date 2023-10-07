@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
         <variable
             name="expense"
             type="com.example.task.model.Expense" />
@@ -41,7 +42,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="Category" />
+                    android:text="@{expense.category}"
+                    tools:text="Category" />
 
             </LinearLayout>
 
@@ -64,7 +66,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="Amount" />
+                    android:text="@{String.valueOf(expense.amount)}"
+                    tools:text="Amount" />
 
             </LinearLayout>
 
@@ -87,7 +90,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="Location" />
+                    android:text="@{expense.location}"
+                    tools:text="Location" />
 
             </LinearLayout>
 

@@ -9,7 +9,7 @@ import com.example.task.model.Expense
 
 class ExpenseAdapter : RecyclerView.Adapter<ExpenseAdapter.ViewHolder>() {
 
-    private var expenseList: List<Expense> = listOf()
+    private var expenseList = emptyList<Expense>()
 
     inner class ViewHolder(private val binding: ItemExpenseBinding) :
         RecyclerView.ViewHolder(binding.root) {
