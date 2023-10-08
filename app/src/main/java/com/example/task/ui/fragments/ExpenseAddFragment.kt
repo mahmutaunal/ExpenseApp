@@ -6,8 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import com.example.task.R
 import com.example.task.databinding.FragmentExpenseAddBinding
+import com.example.task.model.User
 import com.example.task.viewmodel.ExpenseViewModel
 
 class ExpenseAddFragment : Fragment() {
@@ -25,6 +27,7 @@ class ExpenseAddFragment : Fragment() {
         binding.viewModel = expenseViewModel
 
         setupCategoryDropdown()
+        setupSharedUserDropdown()
 
         binding.fabDone.setOnClickListener {
             expenseViewModel.addExpense()
@@ -46,6 +49,19 @@ class ExpenseAddFragment : Fragment() {
         autoCompleteTextView.setOnItemClickListener { _, _, position, _ ->
             val selectedCategory = autoCompleteTextView.adapter.getItem(position) as String
             expenseViewModel.setSelectedCategory(selectedCategory)
+        }
+    }
+
+    private fun setupSharedUserDropdown() {
+        // Create adapter to show users
+        expenseViewModel.users.observe(viewLifecycleOwner) { _ ->
+            expenseViewModel.getUsersAdapter(requireContext())
+        }
+
+        // Observer to update selected user when dropdown item is selected
+        binding.etSharedUser.setOnItemClickListener { parent, _, position, _ ->
+            val selectedUser = parent.getItemAtPosition(position) as User
+            expenseViewModel.setSelectedUser(selectedUser)
         }
     }
 

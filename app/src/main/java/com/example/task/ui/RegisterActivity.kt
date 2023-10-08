@@ -6,7 +6,9 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import com.example.task.databinding.ActivityRegisterBinding
+import com.example.task.model.User
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 
 class RegisterActivity : AppCompatActivity() {
 
@@ -48,6 +50,12 @@ class RegisterActivity : AppCompatActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     binding.progressBar.visibility = View.GONE
+
+                    // User successfully registered, add information to Firebase Realtime Database
+                    val userId = FirebaseAuth.getInstance().currentUser?.uid
+                    val userRef = FirebaseDatabase.getInstance().getReference("Users").child(userId!!)
+                    val user = User(userId, binding.etRegisterEmail.text.toString())
+                    userRef.setValue(user)
 
                     // Sign in success
                     Toast.makeText(
