@@ -9,13 +9,13 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.task.adapter.ExpenseAdapter
 import com.example.task.databinding.FragmentExpenseListBinding
-import com.example.task.viewmodel.ExpenseViewModel
+import com.example.task.viewmodel.ExpenseListViewModel
 
 class ExpenseListFragment : Fragment() {
 
     private lateinit var binding: FragmentExpenseListBinding
     private lateinit var expenseAdapter: ExpenseAdapter
-    private val expenseViewModel: ExpenseViewModel by viewModels()
+    private val expenseAddViewModel: ExpenseListViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -25,7 +25,7 @@ class ExpenseListFragment : Fragment() {
 
         setupRecyclerView()
 
-        expenseViewModel.expenseList.observe(viewLifecycleOwner) { expenses ->
+        expenseAddViewModel.expenseList.observe(viewLifecycleOwner) { expenses ->
             expenses?.let {
                 expenseAdapter.setData(it)
             }

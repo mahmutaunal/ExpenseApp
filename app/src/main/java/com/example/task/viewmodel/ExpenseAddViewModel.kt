@@ -3,7 +3,6 @@ package com.example.task.viewmodel
 import android.content.Context
 import android.util.Log
 import android.widget.ArrayAdapter
-import androidx.databinding.ObservableField
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -20,11 +19,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 
-class ExpenseViewModel : ViewModel() {
-
-    private val _expenseList = MutableLiveData<List<Expense>>()
-    val expenseList: LiveData<List<Expense>>
-        get() = _expenseList
+class ExpenseAddViewModel : ViewModel() {
 
     private val _users = MutableLiveData<List<User>>()
     val users: LiveData<List<User>> get() = _users
@@ -51,7 +46,6 @@ class ExpenseViewModel : ViewModel() {
     private val usersRef = FirebaseDatabase.getInstance().getReference("Users")
 
     init {
-        loadExpensesFromFirebase()
         loadRegisteredUsers()
 
         setPredefinedCategories()
@@ -121,37 +115,6 @@ class ExpenseViewModel : ViewModel() {
         }
     }
 
-    private fun loadExpensesFromFirebase() {
-        //get current userId
-        var uid: String? = null
-        val user = Firebase.auth.currentUser
-        user?.let {
-            uid = it.uid
-        }
-
-        viewModelScope.launch {
-            expenseRef.child(uid!!).addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    val expenses = mutableListOf<Expense>()
-
-                    for (snapshot in dataSnapshot.children) {
-                        val expense = snapshot.getValue(Expense::class.java)
-                        expense?.let {
-                            expenses.add(it)
-                        }
-                    }
-
-                    _expenseList.value = expenses
-                }
-
-                override fun onCancelled(databaseError: DatabaseError) {
-                    Log.e("List Error", databaseError.details)
-                    MyApplication.showToast("Error!")
-                }
-            })
-        }
-    }
-
     fun addExpense() {
         val amount = expenseAmount
         val category = selectedCategory.value
@@ -188,50 +151,34 @@ class ExpenseViewModel : ViewModel() {
             uid = it.uid
         }
 
-        // The action is taken depending on whether the shared user is null or not
-        if (sharedUser == null) {
+        // Add expense to Firebase for current user
+        viewModelScope.launch {
+            val expenseId = expenseRef.push().key
+            expenseId?.let {
+                expense.id = it
+                expenseRef.child(uid!!).child(it).setValue(expense)
+                    .addOnSuccessListener {
+                        MyApplication.showToast("Expense added successfully.")
 
-            // Add expense to Firebase
-            viewModelScope.launch {
-                val expenseId = expenseRef.push().key
-                expenseId?.let {
-                    expense.id = it
-                    expenseRef.child(uid!!).child(it).setValue(expense)
-                        .addOnSuccessListener {
-                            MyApplication.showToast("Expense added successfully.")
-
-                            // If insertion is successful open ListFragment
-                            navigateToExpenseListFragment()
-                        }
-                        .addOnFailureListener {
-                            MyApplication.showToast("Failed to add expense.")
-                        }
-                }
+                        // If insertion is successful open ListFragment
+                        navigateToExpenseListFragment()
+                    }
+                    .addOnFailureListener {
+                        MyApplication.showToast("Failed to add expense.")
+                    }
             }
+        }
 
-        } else {
-
-            // Add expense to Firebase
+        // Add expense to Firebase for shared user if not null
+        if (sharedUser != null) {
             viewModelScope.launch {
                 val expenseId = expenseRef.push().key
                 expenseId?.let {
                     expense.id = it
-
-                    // Adding to the user who added the expense
-                    expenseRef.child(uid!!).child(it).setValue(expense)
-                        .addOnSuccessListener {
-                            MyApplication.showToast("Expense added successfully.")
-
-                            // If insertion is successful open ListFragment
-                            navigateToExpenseListFragment()
-                        }
-                        .addOnFailureListener {
-                            MyApplication.showToast("Failed to add expense.")
-                        }
-
-                    // Adding to shared user
                     expenseRef.child(sharedUser.userId!!).child(it).setValue(expense)
                         .addOnSuccessListener {
+                            MyApplication.showToast("Expense added successfully.")
+
                             // If insertion is successful open ListFragment
                             navigateToExpenseListFragment()
                         }
@@ -240,7 +187,6 @@ class ExpenseViewModel : ViewModel() {
                         }
                 }
             }
-
         }
 
     }
