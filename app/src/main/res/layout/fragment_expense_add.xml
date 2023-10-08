@@ -21,6 +21,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
+            android:visibility="visible"
             app:cardCornerRadius="16dp"
             app:cardElevation="1dp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -82,7 +83,7 @@
                         android:layout_height="wrap_content"
                         android:hint="Amount"
                         android:inputType="numberDecimal"
-                        android:text="@={viewModel.expenseAmount}"
+                        android:text="@={viewModel.amount}"
                         tools:ignore="TextContrastCheck,VisualLintTextFieldSize" />
 
                 </com.google.android.material.textfield.TextInputLayout>
@@ -102,7 +103,7 @@
                         android:layout_height="wrap_content"
                         android:hint="Location"
                         android:inputType="textMultiLine"
-                        android:text="@={viewModel.expenseLocation}"
+                        android:text="@={viewModel.location}"
                         tools:ignore="TextContrastCheck,VisualLintTextFieldSize" />
 
                 </com.google.android.material.textfield.TextInputLayout>
@@ -149,6 +150,7 @@
             android:layout_marginBottom="24dp"
             android:onClick="@{() -> viewModel.addExpense()}"
             android:src="@drawable/ic_done"
+            android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             tools:ignore="ContentDescription,SpeakableTextPresentCheck" />

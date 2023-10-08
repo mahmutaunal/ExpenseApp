@@ -39,8 +39,8 @@ class ExpenseAddViewModel : ViewModel() {
 
     private val registeredUserList = mutableListOf<User>()
 
-    var expenseAmount: String = ""
-    var expenseLocation: String? = null
+    var amount: String = ""
+    var location: String? = null
 
     private val expenseRef = FirebaseDatabase.getInstance().getReference("Expenses")
     private val usersRef = FirebaseDatabase.getInstance().getReference("Users")
@@ -116,13 +116,13 @@ class ExpenseAddViewModel : ViewModel() {
     }
 
     fun addExpense() {
-        val amount = expenseAmount
-        val category = selectedCategory.value
-        var location = expenseLocation
-        val sharedUser = selectedUser.value
+        val expenseAmount = amount
+        val expenseCategory = selectedCategory.value
+        var expenseLocation = location
+        val expenseSharedUser = selectedUser.value
 
         // If amount or category is null, warn the user and do not perform the action
-        if (amount.isEmpty() || category.isNullOrEmpty()) {
+        if (expenseAmount.isEmpty() || expenseCategory.isNullOrEmpty()) {
             setErrorMessage("Amount and Category are required.")
             return
         }
@@ -130,19 +130,19 @@ class ExpenseAddViewModel : ViewModel() {
         // If amount and category are not empty, perform the conversion
         val amountValue: Double
         try {
-            amountValue = amount.toDouble()
+            amountValue = expenseAmount.toDouble()
         } catch (e: NumberFormatException) {
             MyApplication.showToast("Invalid amount.")
             return
         }
 
         // If location is empty or null, set it to -
-        if (location.isNullOrEmpty()) {
-            location = "-"
+        if (expenseLocation.isNullOrEmpty()) {
+            expenseLocation = "-"
         }
 
         // Create expense model
-        val expense = Expense("", category, amountValue, location, sharedUser)
+        val expense = Expense("", expenseCategory, amountValue, expenseLocation, expenseSharedUser)
 
         //get current userId
         var uid: String? = null
@@ -170,12 +170,12 @@ class ExpenseAddViewModel : ViewModel() {
         }
 
         // Add expense to Firebase for shared user if not null
-        if (sharedUser != null) {
+        if (expenseSharedUser != null) {
             viewModelScope.launch {
                 val expenseId = expenseRef.push().key
                 expenseId?.let {
                     expense.id = it
-                    expenseRef.child(sharedUser.userId!!).child(it).setValue(expense)
+                    expenseRef.child(expenseSharedUser.userId!!).child(it).setValue(expense)
                         .addOnSuccessListener {
                             MyApplication.showToast("Expense added successfully.")
 
