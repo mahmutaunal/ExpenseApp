@@ -11,7 +11,7 @@ import com.example.task.model.Action
 import com.example.task.model.User
 import com.example.task.viewmodel.UserListViewModel
 
-class UserAdapter(private val onItemClickListener: (User, Action) -> Unit) :
+class UserAdapter(private val onItemClickListener: (User, Action, Int) -> Unit) :
     RecyclerView.Adapter<UserAdapter.ViewHolder>() {
 
     private var userList = emptyList<User>()
@@ -40,7 +40,7 @@ class UserAdapter(private val onItemClickListener: (User, Action) -> Unit) :
         holder.bind(user)
 
         holder.itemView.setOnClickListener {
-            showOptionsDialog(it.context, user)
+            showOptionsDialog(it.context, user, position)
         }
     }
 
@@ -54,17 +54,30 @@ class UserAdapter(private val onItemClickListener: (User, Action) -> Unit) :
         notifyDataSetChanged()
     }
 
-    private fun showOptionsDialog(context: Context, user: User) {
-        val actions = arrayOf("Connect", "Follow Live")
-        val builder = AlertDialog.Builder(context)
-        builder.setItems(actions) { dialog, which ->
-            when (which) {
-                0 -> onItemClickListener(user, Action.CONNECT)
-                1 -> onItemClickListener(user, Action.FOLLOW)
+    private fun showOptionsDialog(context: Context, user: User, position: Int) {
+        if (user.hasDisconnectedOnce) {
+            val actions = arrayOf("Connect", "Follow Live")
+            val builder = AlertDialog.Builder(context)
+            builder.setItems(actions) { dialog, which ->
+                when (which) {
+                    0 -> onItemClickListener(user, Action.CONNECT, position)
+                    1 -> onItemClickListener(user, Action.FOLLOW, position)
+                }
+                dialog.dismiss()
             }
-            dialog.dismiss()
+            builder.show()
+        } else {
+            val actions = arrayOf("Disconnect", "Follow Live")
+            val builder = AlertDialog.Builder(context)
+            builder.setItems(actions) { dialog, which ->
+                when (which) {
+                    0 -> onItemClickListener(user, Action.DISCONNECT, position)
+                    1 -> onItemClickListener(user, Action.FOLLOW, position)
+                }
+                dialog.dismiss()
+            }
+            builder.show()
         }
-        builder.show()
     }
 
 }

@@ -40,10 +40,11 @@ class UserListFragment : Fragment() {
 
     private fun setupRecyclerView() {
         // Creating and setting adapters for RecyclerView
-        userAdapter = UserAdapter { user, action ->
+        userAdapter = UserAdapter { user, action, position ->
             when (action) {
-                Action.CONNECT -> userListViewModel.connectUser(user)
-                Action.FOLLOW -> userListViewModel.followUser(user)
+                Action.CONNECT -> userListViewModel.connectUser(listOf(user), position)
+                Action.DISCONNECT -> userListViewModel.disconnectUser(listOf(user), position)
+                Action.FOLLOW -> userListViewModel.followUser(user, position)
             }
         }
         binding.recyclerView.apply {

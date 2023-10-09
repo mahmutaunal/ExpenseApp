@@ -33,15 +33,25 @@
 
             <TextView
                 android:id="@+id/email_tv"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
                 android:clickable="true"
                 android:focusable="true"
                 android:text="@{user.email}"
                 android:textSize="18sp"
                 tools:ignore="TouchTargetSizeCheck,DuplicateSpeakableTextCheck"
                 tools:text="Location" />
+
+            <ImageView
+                android:id="@+id/linked_iv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                app:srcCompatDrawable="@{user.isConnected}"
+                tools:ignore="ContentDescription" />
 
         </LinearLayout>
 

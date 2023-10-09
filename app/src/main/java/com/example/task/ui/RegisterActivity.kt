@@ -55,7 +55,7 @@ class RegisterActivity : AppCompatActivity() {
                     val userId = FirebaseAuth.getInstance().currentUser?.uid
                     val userRef =
                         FirebaseDatabase.getInstance().getReference("Users").child(userId!!)
-                    val user = User(userId, binding.etRegisterEmail.text.toString(), false, null)
+                    val user = User(userId, binding.etRegisterEmail.text.toString(), false, "")
                     userRef.setValue(user)
 
                     // Sign in success
