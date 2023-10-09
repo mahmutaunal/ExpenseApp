@@ -15,7 +15,7 @@ class ExpenseListFragment : Fragment() {
 
     private lateinit var binding: FragmentExpenseListBinding
     private lateinit var expenseAdapter: ExpenseAdapter
-    private val expenseAddViewModel: ExpenseListViewModel by viewModels()
+    private val expenseListViewModel: ExpenseListViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -25,7 +25,10 @@ class ExpenseListFragment : Fragment() {
 
         setupRecyclerView()
 
-        expenseAddViewModel.expenseList.observe(viewLifecycleOwner) { expenses ->
+        binding.viewModel = expenseListViewModel
+        binding.lifecycleOwner = this
+
+        expenseListViewModel.expenseList.observe(viewLifecycleOwner) { expenses ->
             expenses?.let {
                 expenseAdapter.setData(it)
             }

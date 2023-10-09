@@ -27,6 +27,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
+                android:minHeight="48dp"
                 android:orientation="horizontal"
                 android:padding="8dp"
                 tools:ignore="UseCompoundDrawables">
@@ -51,6 +52,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
+                android:minHeight="48dp"
                 android:orientation="horizontal"
                 android:padding="8dp"
                 tools:ignore="UseCompoundDrawables">
@@ -75,6 +77,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
+                android:minHeight="48dp"
                 android:orientation="horizontal"
                 android:padding="8dp"
                 tools:ignore="UseCompoundDrawables">
@@ -86,11 +89,25 @@
                     tools:ignore="ContentDescription" />
 
                 <TextView
-                    android:id="@+id/location_tv"
+                    android:id="@+id/locationLatitude_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="@{expense.location}"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:text="@{expense.locationLatitude}"
+                    tools:ignore="TouchTargetSizeCheck,DuplicateSpeakableTextCheck"
+                    tools:text="Location" />
+
+                <TextView
+                    android:id="@+id/locationLongitude_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:text="@{expense.locationLongitude}"
+                    tools:ignore="TouchTargetSizeCheck"
                     tools:text="Location" />
 
             </LinearLayout>

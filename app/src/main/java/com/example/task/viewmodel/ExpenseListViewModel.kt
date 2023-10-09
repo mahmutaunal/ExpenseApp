@@ -1,5 +1,8 @@
 package com.example.task.viewmodel
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -20,6 +23,9 @@ class ExpenseListViewModel : ViewModel() {
     private val _expenseList = MutableLiveData<List<Expense>>()
     val expenseList: LiveData<List<Expense>>
         get() = _expenseList
+
+    private var latitude: String? = null
+    private var longitude: String? =  null
 
     private val expenseRef = FirebaseDatabase.getInstance().getReference("Expenses")
 
@@ -59,4 +65,27 @@ class ExpenseListViewModel : ViewModel() {
             })
         }
     }
+
+    fun onLocationItemClick(context: Context, position: Int) {
+        // Get clicked position
+        latitude = _expenseList.value!![position].locationLatitude
+        longitude = _expenseList.value!![position].locationLongitude
+
+        // Open maps app
+        val gmmIntentUri = Uri.parse("geo:$latitude,$longitude?q=")
+        val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+        mapIntent.setPackage("com.google.android.apps.maps")
+
+        // If you don't have the maps app installed, head to the Play Store to install Google Maps
+        if (mapIntent.resolveActivity(context.packageManager) != null) {
+            context.startActivity(mapIntent)
+        } else {
+            val appStoreIntent = Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("market://details?id=com.google.android.apps.maps")
+            )
+            context.startActivity(appStoreIntent)
+        }
+    }
+
 }

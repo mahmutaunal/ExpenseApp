@@ -95,18 +95,25 @@
                     android:layout_height="wrap_content"
                     android:minHeight="48dp"
                     android:padding="12dp"
-                    app:errorEnabled="true">
+                    tools:ignore="ExtraText">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/et_location"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Location"
+                        android:hint="Location (Optional)"
                         android:inputType="textMultiLine"
-                        android:text="@={viewModel.location}"
+                        android:text="@{viewModel.locationLatitude}"
                         tools:ignore="TextContrastCheck,VisualLintTextFieldSize" />
 
                 </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/currentLocation_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:text="Get current location." />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/et_sharedUser_layout"

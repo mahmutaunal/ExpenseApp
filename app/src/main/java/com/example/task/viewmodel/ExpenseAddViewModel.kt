@@ -1,8 +1,13 @@
 package com.example.task.viewmodel
 
+import android.Manifest
+import android.app.Application
 import android.content.Context
+import android.content.pm.PackageManager
+import android.location.Location
 import android.util.Log
 import android.widget.ArrayAdapter
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -11,6 +16,8 @@ import com.example.task.MyApplication
 import com.example.task.R
 import com.example.task.model.Expense
 import com.example.task.model.User
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -39,11 +46,20 @@ class ExpenseAddViewModel : ViewModel() {
 
     private val registeredUserList = mutableListOf<User>()
 
+    private val _locationLatitude = MutableLiveData<String>()
+    val locationLatitude: LiveData<String>
+        get() = _locationLatitude
+
+    private val _locationLongitude = MutableLiveData<String>()
+    val locationLongitude: LiveData<String>
+        get() = _locationLongitude
+
     var amount: String = ""
-    var location: String? = null
 
     private val expenseRef = FirebaseDatabase.getInstance().getReference("Expenses")
     private val usersRef = FirebaseDatabase.getInstance().getReference("Users")
+
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     init {
         loadRegisteredUsers()
@@ -118,7 +134,8 @@ class ExpenseAddViewModel : ViewModel() {
     fun addExpense() {
         val expenseAmount = amount
         val expenseCategory = selectedCategory.value
-        var expenseLocation = location
+        var expenseLocationLatitude = locationLatitude.value
+        var expenseLocationLongitude = locationLongitude.value
         val expenseSharedUser = selectedUser.value
 
         // If amount or category is null, warn the user and do not perform the action
@@ -137,12 +154,13 @@ class ExpenseAddViewModel : ViewModel() {
         }
 
         // If location is empty or null, set it to -
-        if (expenseLocation.isNullOrEmpty()) {
-            expenseLocation = "-"
+        if (expenseLocationLatitude.isNullOrEmpty() && expenseLocationLongitude.isNullOrEmpty()) {
+            expenseLocationLatitude = "-"
+            expenseLocationLongitude = "-"
         }
 
         // Create expense model
-        val expense = Expense("", expenseCategory, amountValue, expenseLocation, expenseSharedUser)
+        val expense = Expense("", expenseCategory, amountValue, expenseLocationLatitude, expenseLocationLongitude, expenseSharedUser)
 
         //get current userId
         var uid: String? = null
@@ -189,6 +207,38 @@ class ExpenseAddViewModel : ViewModel() {
             }
         }
 
+    }
+
+    fun getCurrentLocationAndSaveExpense(context: Context) {
+        // Initialize
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+
+        // Check location permission
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // Stop the process if there is no permission
+            MyApplication.showToast("Location permission denied.")
+            return
+        }
+
+        // Get location information
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location: Location? ->
+                location?.let {
+                    val currentLocationLatitude = "${it.latitude}"
+                    val currentLocationLongitude = "${it.longitude}"
+                    saveCurrentLocation(currentLocationLatitude, currentLocationLongitude)
+                    Log.e("Location", it.latitude.toString())
+                }
+            }
+    }
+
+    private fun saveCurrentLocation(currentLocationLatitude: String, currentLocationLongitude: String) {
+        _locationLatitude.value = currentLocationLatitude
+        _locationLongitude.value = currentLocationLongitude
     }
 
     // Used to open ExpenseListFragment after expense is added
