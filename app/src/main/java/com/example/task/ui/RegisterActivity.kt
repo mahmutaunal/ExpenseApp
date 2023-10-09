@@ -53,8 +53,9 @@ class RegisterActivity : AppCompatActivity() {
 
                     // User successfully registered, add information to Firebase Realtime Database
                     val userId = FirebaseAuth.getInstance().currentUser?.uid
-                    val userRef = FirebaseDatabase.getInstance().getReference("Users").child(userId!!)
-                    val user = User(userId, binding.etRegisterEmail.text.toString())
+                    val userRef =
+                        FirebaseDatabase.getInstance().getReference("Users").child(userId!!)
+                    val user = User(userId, binding.etRegisterEmail.text.toString(), false, null)
                     userRef.setValue(user)
 
                     // Sign in success

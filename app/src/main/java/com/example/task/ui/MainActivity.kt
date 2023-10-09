@@ -11,6 +11,7 @@ import com.example.task.R
 import com.example.task.databinding.ActivityMainBinding
 import com.example.task.ui.fragments.ExpenseAddFragment
 import com.example.task.ui.fragments.ExpenseListFragment
+import com.example.task.ui.fragments.UserListFragment
 import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : AppCompatActivity() {
@@ -35,8 +36,18 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.logout_item) {
             logout()
+        } else if (item.itemId == R.id.users_item) {
+            openUsersFragment()
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun openUsersFragment() {
+        val userListFragment = UserListFragment()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.nav_host_fragment, userListFragment)
+            .addToBackStack(null)
+            .commit()
     }
 
     private fun logout() {

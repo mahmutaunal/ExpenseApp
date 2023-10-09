@@ -231,7 +231,6 @@ class ExpenseAddViewModel : ViewModel() {
                     val currentLocationLatitude = "${it.latitude}"
                     val currentLocationLongitude = "${it.longitude}"
                     saveCurrentLocation(currentLocationLatitude, currentLocationLongitude)
-                    Log.e("Location", it.latitude.toString())
                 }
             }
     }
