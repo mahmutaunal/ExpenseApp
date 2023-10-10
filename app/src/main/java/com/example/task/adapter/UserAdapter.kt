@@ -6,6 +6,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.task.R
 import com.example.task.databinding.ItemUserBinding
 import com.example.task.model.Action
 import com.example.task.model.User
@@ -17,7 +18,7 @@ class UserAdapter(private val onItemClickListener: (User, Action, Int) -> Unit) 
     private var userList = emptyList<User>()
     private var userListViewModel = UserListViewModel()
 
-    inner class ViewHolder(private val binding: ItemUserBinding) :
+    inner class ViewHolder(val binding: ItemUserBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(user: User) {
@@ -46,6 +47,17 @@ class UserAdapter(private val onItemClickListener: (User, Action, Int) -> Unit) 
                 }
             })
         }
+
+        // Update ImageView source based on match status
+        userListViewModel.getIsConnectedStatus(object : IsConnectedCallback {
+            override fun onIsCurrentUserConnectedFetched(isConnected: String) {
+                if (isConnected == "true") {
+                    holder.binding.linkedIv.setImageResource(R.drawable.ic_link)
+                } else {
+                    holder.binding.linkedIv.setImageResource(R.drawable.ic_link_off)
+                }
+            }
+        })
     }
 
     override fun getItemCount(): Int {
@@ -58,7 +70,12 @@ class UserAdapter(private val onItemClickListener: (User, Action, Int) -> Unit) 
         notifyDataSetChanged()
     }
 
-    private fun showOptionsDialog(context: Context, user: User, isConnected: String, position: Int) {
+    private fun showOptionsDialog(
+        context: Context,
+        user: User,
+        isConnected: String,
+        position: Int
+    ) {
         if (isConnected == "true") {
             val actions = arrayOf("Disconnect", "Follow Live")
             val builder = AlertDialog.Builder(context)

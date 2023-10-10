@@ -13,7 +13,7 @@ class ExpenseAdapter : RecyclerView.Adapter<ExpenseAdapter.ViewHolder>() {
     private var expenseList = emptyList<Expense>()
     private val expenseListViewModel = ExpenseListViewModel()
 
-    inner class ViewHolder(private val binding: ItemExpenseBinding) :
+    inner class ViewHolder(val binding: ItemExpenseBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(expense: Expense) {
@@ -35,8 +35,13 @@ class ExpenseAdapter : RecyclerView.Adapter<ExpenseAdapter.ViewHolder>() {
         val expense = expenseList[position]
         holder.bind(expense)
 
-        // Open Maps
-        holder.itemView.setOnClickListener {
+        // Open maps for click textview
+        holder.binding.locationTv.setOnClickListener {
+            expenseListViewModel.onLocationItemClick(it.context, position)
+        }
+
+        // Open maps for click imageview
+        holder.binding.locationIv.setOnClickListener {
             expenseListViewModel.onLocationItemClick(it.context, position)
         }
     }
