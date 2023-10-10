@@ -6,14 +6,16 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import com.example.task.databinding.ActivityRegisterBinding
-import com.example.task.model.User
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 
 class RegisterActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRegisterBinding
     private lateinit var auth: FirebaseAuth
+    private lateinit var database: FirebaseDatabase
+    private lateinit var usersRef: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,6 +26,8 @@ class RegisterActivity : AppCompatActivity() {
         supportActionBar?.setDisplayShowHomeEnabled(true)
 
         auth = FirebaseAuth.getInstance()
+        database = FirebaseDatabase.getInstance()
+        usersRef = database.getReference("Users")
 
         binding.btnRegister.setOnClickListener { controlEditText() }
     }
@@ -53,12 +57,9 @@ class RegisterActivity : AppCompatActivity() {
 
                     // User successfully registered, add information to Firebase Realtime Database
                     val userId = FirebaseAuth.getInstance().currentUser?.uid
-                    val userRef =
-                        FirebaseDatabase.getInstance().getReference("Users").child(userId!!)
-                    val user = User(userId, binding.etRegisterEmail.text.toString(), false, "")
-                    userRef.setValue(user)
+                    saveUserData(userId!!, binding.etRegisterEmail.text.toString(), false, "", true)
 
-                    // Sign in success
+                    // Sign in success message
                     Toast.makeText(
                         baseContext,
                         "Account created.",
@@ -80,5 +81,16 @@ class RegisterActivity : AppCompatActivity() {
                     ).show()
                 }
             }
+    }
+
+    private fun saveUserData(userId: String, email: String, isConnected: Boolean, connectedUserId: String?, hasDisconnectedOnce: Boolean) {
+        val user = HashMap<String, Any>()
+        user["userId"] = userId
+        user["email"] = email
+        user["isConnected"] = isConnected
+        user["connectedUserId"] = connectedUserId.orEmpty()
+        user["hasDisconnectedOnce"] = hasDisconnectedOnce
+
+        usersRef.child(userId).setValue(user)
     }
 }

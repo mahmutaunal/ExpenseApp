@@ -9,13 +9,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.task.databinding.ItemUserBinding
 import com.example.task.model.Action
 import com.example.task.model.User
-import com.example.task.viewmodel.UserListViewModel
 
 class UserAdapter(private val onItemClickListener: (User, Action, Int) -> Unit) :
     RecyclerView.Adapter<UserAdapter.ViewHolder>() {
 
     private var userList = emptyList<User>()
-    private val userListViewModel = UserListViewModel()
 
     inner class ViewHolder(private val binding: ItemUserBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -55,23 +53,23 @@ class UserAdapter(private val onItemClickListener: (User, Action, Int) -> Unit) 
     }
 
     private fun showOptionsDialog(context: Context, user: User, position: Int) {
-        if (user.hasDisconnectedOnce) {
-            val actions = arrayOf("Connect", "Follow Live")
+        if (user.isConnected) {
+            val actions = arrayOf("Disconnect", "Follow Live")
             val builder = AlertDialog.Builder(context)
             builder.setItems(actions) { dialog, which ->
                 when (which) {
-                    0 -> onItemClickListener(user, Action.CONNECT, position)
+                    0 -> onItemClickListener(user, Action.DISCONNECT, position)
                     1 -> onItemClickListener(user, Action.FOLLOW, position)
                 }
                 dialog.dismiss()
             }
             builder.show()
         } else {
-            val actions = arrayOf("Disconnect", "Follow Live")
+            val actions = arrayOf("Connect", "Follow Live")
             val builder = AlertDialog.Builder(context)
             builder.setItems(actions) { dialog, which ->
                 when (which) {
-                    0 -> onItemClickListener(user, Action.DISCONNECT, position)
+                    0 -> onItemClickListener(user, Action.CONNECT, position)
                     1 -> onItemClickListener(user, Action.FOLLOW, position)
                 }
                 dialog.dismiss()

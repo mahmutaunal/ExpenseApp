@@ -3,7 +3,6 @@ package com.example.task.adapter
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
 import com.example.task.databinding.ItemExpenseBinding
 import com.example.task.model.Expense

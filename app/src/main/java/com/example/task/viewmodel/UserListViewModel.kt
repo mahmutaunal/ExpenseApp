@@ -37,11 +37,11 @@ class UserListViewModel : ViewModel() {
 
         // Get all registered users data from Firebase
         viewModelScope.launch {
-            usersRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            usersRef.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    for (snapshot in dataSnapshot.children) {
-                        val users = mutableListOf<User>()
+                    val users = mutableListOf<User>()
 
+                    for (snapshot in dataSnapshot.children) {
                         val userId = snapshot.key
 
                         if (userId != null) {
@@ -77,19 +77,19 @@ class UserListViewModel : ViewModel() {
         val database = FirebaseDatabase.getInstance()
         val usersRef = database.getReference("Users")
 
-        // User to connect to
-        val connectedUserRef = usersRef.child(uid.toString())
+        // Current User
+        val currentUserRef = usersRef.child(uid.toString())
 
         // Other user whose connected user ID will be obtained
-        val otherUserRef = usersRef.child(user[position].userId.toString())
+        val otherUserRef = usersRef.child(user[position].userId)
 
-        // Connection operations
-        connectedUserRef.child("connected").setValue(true)
-        connectedUserRef.child("connectedUserId").setValue(otherUserRef.key)
+        // Connection operations for current user
+        currentUserRef.child("isConnected").setValue(true)
+        currentUserRef.child("connectedUserId").setValue(otherUserRef.key)
 
         // Update the information of the person the connected user is connected to
-        otherUserRef.child("connected").setValue(true)
-        otherUserRef.child("connectedUserId").setValue(connectedUserRef.key)
+        otherUserRef.child("isConnected").setValue(true)
+        otherUserRef.child("connectedUserId").setValue(currentUserRef.key)
 
         // Show successful message
         MyApplication.showToast("Connected")
@@ -114,17 +114,17 @@ class UserListViewModel : ViewModel() {
         val usersRef = database.getReference("Users")
 
         // User to disconnect to
-        val connectedUserRef = usersRef.child(uid.toString())
+        val currentUserRef = usersRef.child(uid.toString())
 
         // Other user whose disconnected user ID will be obtained
         val otherUserRef = usersRef.child(user[position].userId.toString())
 
         // Disconnection operations
-        connectedUserRef.child("connected").setValue(false)
-        connectedUserRef.child("connectedUserId").setValue(null)
+        currentUserRef.child("isConnected").setValue(false)
+        currentUserRef.child("connectedUserId").setValue(null)
 
         // Update the information of the person the connected user is disconnected to
-        otherUserRef.child("connected").setValue(false)
+        otherUserRef.child("isConnected").setValue(false)
         otherUserRef.child("connectedUserId").setValue(null)
 
         // Show successful message

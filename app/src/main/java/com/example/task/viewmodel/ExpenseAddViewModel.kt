@@ -1,11 +1,9 @@
 package com.example.task.viewmodel
 
 import android.Manifest
-import android.app.Application
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
-import android.util.Log
 import android.widget.ArrayAdapter
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.LiveData
@@ -15,21 +13,14 @@ import androidx.lifecycle.viewModelScope
 import com.example.task.MyApplication
 import com.example.task.R
 import com.example.task.model.Expense
-import com.example.task.model.User
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 
 class ExpenseAddViewModel : ViewModel() {
-
-    private val _users = MutableLiveData<List<User>>()
-    val users: LiveData<List<User>> get() = _users
 
     private val _errorMessage = MutableLiveData<String>()
     val errorMessage: LiveData<String>
@@ -40,11 +31,6 @@ class ExpenseAddViewModel : ViewModel() {
 
     private val _selectedCategory = MutableLiveData<String>()
     val selectedCategory: LiveData<String> get() = _selectedCategory
-
-    private val _selectedUser = MutableLiveData<User?>()
-    val selectedUser: LiveData<User?> get() = _selectedUser
-
-    private val registeredUserList = mutableListOf<User>()
 
     private val _locationLatitude = MutableLiveData<String>()
     val locationLatitude: LiveData<String>
@@ -57,15 +43,11 @@ class ExpenseAddViewModel : ViewModel() {
     var amount: String = ""
 
     private val expenseRef = FirebaseDatabase.getInstance().getReference("Expenses")
-    private val usersRef = FirebaseDatabase.getInstance().getReference("Users")
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     init {
-        loadRegisteredUsers()
-
         setPredefinedCategories()
-        setUsers(registeredUserList)
     }
 
     private fun setPredefinedCategories() {
@@ -83,60 +65,11 @@ class ExpenseAddViewModel : ViewModel() {
         _selectedCategory.value = category
     }
 
-    fun setSelectedUser(user: User?) {
-        _selectedUser.value = user
-    }
-
-    fun getUsersAdapter(context: Context): ArrayAdapter<User> {
-        val adapter = ArrayAdapter(context, R.layout.dropdown_item, users.value.orEmpty())
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        return adapter
-    }
-
-    private fun setUsers(users: List<User>) {
-        _users.value = users
-    }
-
-    private fun loadRegisteredUsers() {
-        //get current userId
-        var uid: String? = null
-        val user = Firebase.auth.currentUser
-        user?.let {
-            uid = it.uid
-        }
-
-        // Get all registered users data from Firebase
-        viewModelScope.launch {
-            usersRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    for (snapshot in dataSnapshot.children) {
-                        val userId = snapshot.key
-                        val email = snapshot.child("email").getValue(String::class.java) ?: ""
-
-                        if (userId != null) {
-                            if (userId != uid) {
-                                val user = User(userId, email)
-                                registeredUserList.add(user)
-                            }
-                        }
-                    }
-                    _users.postValue(registeredUserList)
-                }
-
-                override fun onCancelled(databaseError: DatabaseError) {
-                    Log.e("Users Error", databaseError.details)
-                    MyApplication.showToast("Error!")
-                }
-            })
-        }
-    }
-
     fun addExpense() {
         val expenseAmount = amount
         val expenseCategory = selectedCategory.value
         var expenseLocationLatitude = locationLatitude.value
         var expenseLocationLongitude = locationLongitude.value
-        val expenseSharedUser = selectedUser.value
 
         // If amount or category is null, warn the user and do not perform the action
         if (expenseAmount.isEmpty() || expenseCategory.isNullOrEmpty()) {
@@ -160,7 +93,13 @@ class ExpenseAddViewModel : ViewModel() {
         }
 
         // Create expense model
-        val expense = Expense("", expenseCategory, amountValue, expenseLocationLatitude, expenseLocationLongitude, expenseSharedUser)
+        val expense = Expense(
+            "",
+            expenseCategory,
+            amountValue,
+            expenseLocationLatitude,
+            expenseLocationLongitude
+        )
 
         //get current userId
         var uid: String? = null
@@ -186,27 +125,6 @@ class ExpenseAddViewModel : ViewModel() {
                     }
             }
         }
-
-        // Add expense to Firebase for shared user if not null
-        if (expenseSharedUser != null) {
-            viewModelScope.launch {
-                val expenseId = expenseRef.push().key
-                expenseId?.let {
-                    expense.id = it
-                    expenseRef.child(expenseSharedUser.userId!!).child(it).setValue(expense)
-                        .addOnSuccessListener {
-                            MyApplication.showToast("Expense added successfully.")
-
-                            // If insertion is successful open ListFragment
-                            navigateToExpenseListFragment()
-                        }
-                        .addOnFailureListener {
-                            MyApplication.showToast("Failed to add expense.")
-                        }
-                }
-            }
-        }
-
     }
 
     fun getCurrentLocationAndSaveExpense(context: Context) {
@@ -235,7 +153,10 @@ class ExpenseAddViewModel : ViewModel() {
             }
     }
 
-    private fun saveCurrentLocation(currentLocationLatitude: String, currentLocationLongitude: String) {
+    private fun saveCurrentLocation(
+        currentLocationLatitude: String,
+        currentLocationLongitude: String
+    ) {
         _locationLatitude.value = currentLocationLatitude
         _locationLongitude.value = currentLocationLongitude
     }

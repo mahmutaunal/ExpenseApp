@@ -17,6 +17,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
+import kotlin.math.log
 
 class ExpenseListViewModel : ViewModel() {
 
@@ -25,16 +26,23 @@ class ExpenseListViewModel : ViewModel() {
         get() = _expenseList
 
     private var latitude: String? = null
-    private var longitude: String? =  null
+    private var longitude: String? = null
 
-    private val expenseRef = FirebaseDatabase.getInstance().getReference("Expenses")
+    private var expenses = mutableListOf<Expense>()
+
+    // Variable to store the matched user's ID
+    private val connectedUserId: MutableLiveData<String> = MutableLiveData()
+
+    private val database: FirebaseDatabase = FirebaseDatabase.getInstance()
+    private val expensesRef = database.getReference("Expenses")
+    private val usersRef = database.getReference("Users")
 
     init {
-        loadExpenses()
+        loadExpensesForCurrentUser()
     }
 
 
-    private fun loadExpenses() {
+    private fun loadExpensesForCurrentUser() {
         // Get current userId
         var uid: String? = null
         val user = Firebase.auth.currentUser
@@ -42,12 +50,12 @@ class ExpenseListViewModel : ViewModel() {
             uid = it.uid
         }
 
-        // Get All expenses data from Firebase
-        viewModelScope.launch {
-            expenseRef.child(uid!!).addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    val expenses = mutableListOf<Expense>()
+        Log.e("current", uid.toString())
 
+        // Get All expenses data from Firebase for current user
+        viewModelScope.launch {
+            expensesRef.child(uid!!).addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
                     for (snapshot in dataSnapshot.children) {
                         val expense = snapshot.getValue(Expense::class.java)
                         expense?.let {
@@ -64,6 +72,63 @@ class ExpenseListViewModel : ViewModel() {
                 }
             })
         }
+
+        // Get connected user expense list
+        getConnectedUserId()
+    }
+
+    fun setConnectedUserId(userId: String) {
+        connectedUserId.value = userId
+        // Pull data from Firebase when Connected User ID changes
+        loadExpenseForConnectedUser(userId)
+    }
+
+    private fun loadExpenseForConnectedUser(userId: String) {
+        // Get All expenses data from Firebase for connected user
+        if (userId != "" || userId != null) {
+            Log.e("connected", userId)
+            viewModelScope.launch {
+                expensesRef.child(userId)
+                    .addValueEventListener(object : ValueEventListener {
+                        override fun onDataChange(dataSnapshot: DataSnapshot) {
+                            for (snapshot in dataSnapshot.children) {
+                                val expense = snapshot.getValue(Expense::class.java)
+                                expense?.let {
+                                    expenses.add(it)
+                                }
+                            }
+
+                            _expenseList.value = expenses
+                        }
+
+                        override fun onCancelled(databaseError: DatabaseError) {
+                            Log.e("List Error", databaseError.details)
+                        }
+                    })
+            }
+        }
+    }
+
+    private fun getConnectedUserId() {
+        //get current userId
+        var uid: String? = null
+        val user = Firebase.auth.currentUser
+        user?.let {
+            uid = it.uid
+        }
+
+        val connectedUserIdRef = usersRef.child(uid!!).child("connectedUserId")
+        val connectedUserIdListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                setConnectedUserId(dataSnapshot.value.toString())
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                Log.e("Connected User Id Error", databaseError.details)
+            }
+        }
+
+        connectedUserIdRef.addValueEventListener(connectedUserIdListener)
     }
 
     fun onLocationItemClick(context: Context, position: Int) {
