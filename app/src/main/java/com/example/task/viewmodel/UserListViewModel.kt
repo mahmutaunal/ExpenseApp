@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.task.MyApplication
+import com.example.task.adapter.UserAdapter
 import com.example.task.model.User
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DataSnapshot
@@ -20,6 +21,11 @@ class UserListViewModel : ViewModel() {
     private val _userList = MutableLiveData<List<User>>()
     val userList: LiveData<List<User>>
         get() = _userList
+
+    // Variable to store the matched user's isConnect status
+    private val _isUserConnected = MutableLiveData<String>()
+    val isUserConnected: LiveData<String>
+        get() = _isUserConnected
 
     private val usersRef = FirebaseDatabase.getInstance().getReference("Users")
 
@@ -140,6 +146,33 @@ class UserListViewModel : ViewModel() {
     fun followUser(user: User, position: Int) {
         // Canlı takip işlemleri burada gerçekleştirilecek
         // Firebase güncelleme işlemleri burada yapılabilir.
+    }
+
+    fun getIsConnectedStatus(callback: UserAdapter.IsConnectedCallback) {
+        //get current userId
+        var uid: String? = null
+        val user = Firebase.auth.currentUser
+        user?.let {
+            uid = it.uid
+        }
+
+        val connectedUserIdRef = usersRef.child(uid!!).child("isConnected")
+        val connectedUserIdListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                setIsConnectedStatus(dataSnapshot.value.toString())
+                callback.onIsCurrentUserConnectedFetched(dataSnapshot.value.toString())
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                Log.e("Connected User Id Error", databaseError.details)
+            }
+        }
+
+        connectedUserIdRef.addValueEventListener(connectedUserIdListener)
+    }
+
+    private fun setIsConnectedStatus(isConnected: String) {
+        _isUserConnected.value = isConnected
     }
 
 }

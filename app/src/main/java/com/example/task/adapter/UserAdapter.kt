@@ -9,11 +9,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.task.databinding.ItemUserBinding
 import com.example.task.model.Action
 import com.example.task.model.User
+import com.example.task.viewmodel.UserListViewModel
 
 class UserAdapter(private val onItemClickListener: (User, Action, Int) -> Unit) :
     RecyclerView.Adapter<UserAdapter.ViewHolder>() {
 
     private var userList = emptyList<User>()
+    private var userListViewModel = UserListViewModel()
 
     inner class ViewHolder(private val binding: ItemUserBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -34,11 +36,15 @@ class UserAdapter(private val onItemClickListener: (User, Action, Int) -> Unit) 
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val user = userList[position]
+        val user = userList[holder.adapterPosition]
         holder.bind(user)
 
         holder.itemView.setOnClickListener {
-            showOptionsDialog(it.context, user, position)
+            userListViewModel.getIsConnectedStatus(object : IsConnectedCallback {
+                override fun onIsCurrentUserConnectedFetched(isConnected: String) {
+                    showOptionsDialog(it.context, user, isConnected, holder.adapterPosition)
+                }
+            })
         }
     }
 
@@ -52,8 +58,8 @@ class UserAdapter(private val onItemClickListener: (User, Action, Int) -> Unit) 
         notifyDataSetChanged()
     }
 
-    private fun showOptionsDialog(context: Context, user: User, position: Int) {
-        if (user.isConnected) {
+    private fun showOptionsDialog(context: Context, user: User, isConnected: String, position: Int) {
+        if (isConnected == "true") {
             val actions = arrayOf("Disconnect", "Follow Live")
             val builder = AlertDialog.Builder(context)
             builder.setItems(actions) { dialog, which ->
@@ -76,6 +82,10 @@ class UserAdapter(private val onItemClickListener: (User, Action, Int) -> Unit) 
             }
             builder.show()
         }
+    }
+
+    interface IsConnectedCallback {
+        fun onIsCurrentUserConnectedFetched(isConnected: String)
     }
 
 }

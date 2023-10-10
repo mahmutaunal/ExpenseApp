@@ -17,7 +17,6 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
-import kotlin.math.log
 
 class ExpenseListViewModel : ViewModel() {
 
@@ -49,8 +48,6 @@ class ExpenseListViewModel : ViewModel() {
         user?.let {
             uid = it.uid
         }
-
-        Log.e("current", uid.toString())
 
         // Get All expenses data from Firebase for current user
         viewModelScope.launch {
@@ -86,7 +83,6 @@ class ExpenseListViewModel : ViewModel() {
     private fun loadExpenseForConnectedUser(userId: String) {
         // Get All expenses data from Firebase for connected user
         if (userId != "" || userId != null) {
-            Log.e("connected", userId)
             viewModelScope.launch {
                 expensesRef.child(userId)
                     .addValueEventListener(object : ValueEventListener {
