@@ -103,7 +103,7 @@
                         android:layout_height="wrap_content"
                         android:hint="Location (Optional)"
                         android:inputType="textMultiLine"
-                        android:text="@{viewModel.locationLatitude}"
+                        android:text="@{viewModel.location}"
                         tools:ignore="TextContrastCheck,VisualLintTextFieldSize" />
 
                 </com.google.android.material.textfield.TextInputLayout>
@@ -113,7 +113,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:clickable="true"
-                    android:text="Get current location." />
+                    android:text="Get current location."
+                    tools:ignore="TouchTargetSizeCheck" />
 
             </LinearLayout>
 

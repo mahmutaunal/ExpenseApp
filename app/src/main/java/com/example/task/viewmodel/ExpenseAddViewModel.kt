@@ -32,13 +32,9 @@ class ExpenseAddViewModel : ViewModel() {
     private val _selectedCategory = MutableLiveData<String>()
     val selectedCategory: LiveData<String> get() = _selectedCategory
 
-    private val _locationLatitude = MutableLiveData<String>()
-    val locationLatitude: LiveData<String>
-        get() = _locationLatitude
-
-    private val _locationLongitude = MutableLiveData<String>()
-    val locationLongitude: LiveData<String>
-        get() = _locationLongitude
+    private val _location = MutableLiveData<String>()
+    val location: LiveData<String>
+        get() = _location
 
     var amount: String = ""
 
@@ -68,8 +64,7 @@ class ExpenseAddViewModel : ViewModel() {
     fun addExpense() {
         val expenseAmount = amount
         val expenseCategory = selectedCategory.value
-        var expenseLocationLatitude = locationLatitude.value
-        var expenseLocationLongitude = locationLongitude.value
+        var expenseLocation = location.value
 
         // If amount or category is null, warn the user and do not perform the action
         if (expenseAmount.isEmpty() || expenseCategory.isNullOrEmpty()) {
@@ -87,9 +82,8 @@ class ExpenseAddViewModel : ViewModel() {
         }
 
         // If location is empty or null, set it to -
-        if (expenseLocationLatitude.isNullOrEmpty() && expenseLocationLongitude.isNullOrEmpty()) {
-            expenseLocationLatitude = "-"
-            expenseLocationLongitude = "-"
+        if (expenseLocation.isNullOrEmpty()) {
+            expenseLocation = "-"
         }
 
         // Create expense model
@@ -97,8 +91,7 @@ class ExpenseAddViewModel : ViewModel() {
             "",
             expenseCategory,
             amountValue,
-            expenseLocationLatitude,
-            expenseLocationLongitude
+            expenseLocation
         )
 
         //get current userId
@@ -157,8 +150,7 @@ class ExpenseAddViewModel : ViewModel() {
         currentLocationLatitude: String,
         currentLocationLongitude: String
     ) {
-        _locationLatitude.value = currentLocationLatitude
-        _locationLongitude.value = currentLocationLongitude
+        _location.value = "$currentLocationLatitude , $currentLocationLongitude"
     }
 
     // Used to open ExpenseListFragment after expense is added

@@ -24,8 +24,7 @@ class ExpenseListViewModel : ViewModel() {
     val expenseList: LiveData<List<Expense>>
         get() = _expenseList
 
-    private var latitude: String? = null
-    private var longitude: String? = null
+    private var location: String? = null
 
     private var expenses = mutableListOf<Expense>()
 
@@ -129,23 +128,26 @@ class ExpenseListViewModel : ViewModel() {
 
     fun onLocationItemClick(context: Context, position: Int) {
         // Get clicked position
-        latitude = _expenseList.value!![position].locationLatitude
-        longitude = _expenseList.value!![position].locationLongitude
+        location = _expenseList.value!![position].location
 
-        // Open maps app
-        val gmmIntentUri = Uri.parse("geo:$latitude,$longitude?q=")
-        val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
-        mapIntent.setPackage("com.google.android.apps.maps")
+        if (location != "" || location != null || location != "-") {
+            // Open maps app
+            val gmmIntentUri = Uri.parse("geo:0,0?q=$location")
+            val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+            mapIntent.setPackage("com.google.android.apps.maps")
 
-        // If you don't have the maps app installed, head to the Play Store to install Google Maps
-        if (mapIntent.resolveActivity(context.packageManager) != null) {
-            context.startActivity(mapIntent)
+            // If you don't have the maps app installed, head to the Play Store to install Google Maps
+            if (mapIntent.resolveActivity(context.packageManager) != null) {
+                context.startActivity(mapIntent)
+            } else {
+                val appStoreIntent = Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("market://details?id=com.google.android.apps.maps")
+                )
+                context.startActivity(appStoreIntent)
+            }
         } else {
-            val appStoreIntent = Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse("market://details?id=com.google.android.apps.maps")
-            )
-            context.startActivity(appStoreIntent)
+            MyApplication.showToast("Invalid location!")
         }
     }
 

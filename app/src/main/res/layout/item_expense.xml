@@ -89,25 +89,14 @@
                     tools:ignore="ContentDescription" />
 
                 <TextView
-                    android:id="@+id/locationLatitude_tv"
+                    android:id="@+id/location_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:clickable="true"
                     android:focusable="true"
-                    android:text="@{expense.locationLatitude}"
+                    android:text="@{expense.location}"
                     tools:ignore="TouchTargetSizeCheck,DuplicateSpeakableTextCheck"
-                    tools:text="Location" />
-
-                <TextView
-                    android:id="@+id/locationLongitude_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:text="@{expense.locationLongitude}"
-                    tools:ignore="TouchTargetSizeCheck"
                     tools:text="Location" />
 
             </LinearLayout>

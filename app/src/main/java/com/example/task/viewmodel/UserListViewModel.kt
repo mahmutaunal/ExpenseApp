@@ -23,9 +23,7 @@ class UserListViewModel : ViewModel() {
         get() = _userList
 
     // Variable to store the matched user's isConnect status
-    private val _isUserConnected = MutableLiveData<String>()
-    val isUserConnected: LiveData<String>
-        get() = _isUserConnected
+    private val isUserConnected = MutableLiveData<String>()
 
     private val usersRef = FirebaseDatabase.getInstance().getReference("Users")
 
@@ -123,7 +121,7 @@ class UserListViewModel : ViewModel() {
         val currentUserRef = usersRef.child(uid.toString())
 
         // Other user whose disconnected user ID will be obtained
-        val otherUserRef = usersRef.child(user[position].userId.toString())
+        val otherUserRef = usersRef.child(user[position].userId)
 
         // Disconnection operations
         currentUserRef.child("isConnected").setValue(false)
@@ -143,10 +141,7 @@ class UserListViewModel : ViewModel() {
         user[position].hasDisconnectedOnce = true
     }
 
-    fun followUser(user: User, position: Int) {
-        // Canlı takip işlemleri burada gerçekleştirilecek
-        // Firebase güncelleme işlemleri burada yapılabilir.
-    }
+    fun followUser(user: User, position: Int) { }
 
     fun getIsConnectedStatus(callback: UserAdapter.IsConnectedCallback) {
         //get current userId
@@ -172,7 +167,7 @@ class UserListViewModel : ViewModel() {
     }
 
     private fun setIsConnectedStatus(isConnected: String) {
-        _isUserConnected.value = isConnected
+        isUserConnected.value = isConnected
     }
 
 }
