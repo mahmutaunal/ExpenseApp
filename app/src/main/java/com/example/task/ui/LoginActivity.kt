@@ -4,14 +4,16 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
+import androidx.activity.viewModels
 import com.example.task.databinding.ActivityLoginBinding
+import com.example.task.viewmodel.LoginViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
     private lateinit var auth: FirebaseAuth
+    private val loginViewModel: LoginViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,65 +23,33 @@ class LoginActivity : AppCompatActivity() {
 
         auth = FirebaseAuth.getInstance()
 
-        binding.btnLogin.setOnClickListener { controlEditText() }
+        binding.viewModel = loginViewModel
+        binding.lifecycleOwner = this
 
-        binding.tvRegister.setOnClickListener {
-            val intent = Intent(applicationContext, RegisterActivity::class.java)
-            startActivity(intent)
+        // Update progress bar visibility with LiveData
+        loginViewModel.isLoading.observe(this) { isLoading ->
+            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        }
+
+        // Check Activity completion by observing LiveData
+        loginViewModel.shouldFinishActivity.observe(this) { shouldFinish ->
+            if (shouldFinish) {
+                // Finish Activity
+                finish()
+                // Reset request in ViewModel
+                loginViewModel.onActivityFinished()
+            }
         }
     }
 
     public override fun onStart() {
         super.onStart()
-        // Check if user is signed in (non-null) and update UI accordingly.
+        // Check if user is signed in (non-null) and open MainActivity() accordingly.
         val currentUser = auth.currentUser
         if (currentUser != null) {
             val intent = Intent(applicationContext, MainActivity::class.java)
             startActivity(intent)
             finish()
         }
-    }
-
-    private fun controlEditText() {
-        binding.progressBar.visibility = View.VISIBLE
-
-        if (binding.etEmail.text!!.equals("")) {
-            binding.etEmailLayout.error = "Please enter email."
-            binding.progressBar.visibility = View.GONE
-        } else if (binding.etPassword.text!!.equals("")) {
-            binding.etEmailLayout.error = "Please enter password."
-            binding.progressBar.visibility = View.GONE
-        } else {
-            login()
-        }
-    }
-
-    private fun login() {
-        auth.signInWithEmailAndPassword(
-            binding.etEmail.text.toString(),
-            binding.etPassword.text.toString()
-        )
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    // Sign in success
-                    binding.progressBar.visibility = View.GONE
-
-                    Toast.makeText(applicationContext, "Login successful.", Toast.LENGTH_SHORT)
-                        .show()
-
-                    val intent = Intent(applicationContext, MainActivity::class.java)
-                    startActivity(intent)
-                    finish()
-                } else {
-                    binding.progressBar.visibility = View.GONE
-
-                    // If sign in fails, display a message to the user.
-                    Toast.makeText(
-                        baseContext,
-                        "Authentication failed.",
-                        Toast.LENGTH_SHORT,
-                    ).show()
-                }
-            }
     }
 }

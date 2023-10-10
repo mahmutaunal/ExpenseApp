@@ -1,5 +1,7 @@
 package com.example.task.viewmodel
 
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -24,6 +26,10 @@ class UserListViewModel : ViewModel() {
 
     // Variable to store the matched user's isConnect status
     private val isUserConnected = MutableLiveData<String>()
+
+    private val _refreshing = MutableLiveData<Boolean>()
+    val refreshing: LiveData<Boolean>
+        get() = _refreshing
 
     private val usersRef = FirebaseDatabase.getInstance().getReference("Users")
 
@@ -100,9 +106,6 @@ class UserListViewModel : ViewModel() {
 
         // Update connectedUser when connecting occurs
         user[position].isConnected = true
-
-        // hasDisconnectedOnce is reset when the connect operation occurs
-        user[position].hasDisconnectedOnce = false
     }
 
     fun disconnectUser(user: List<User>, position: Int) {
@@ -136,9 +139,6 @@ class UserListViewModel : ViewModel() {
 
         // Update connectedUser when disconnecting occurs
         user[position].isConnected = false
-
-        // hasDisconnectedOnce is reset when the disconnect operation occurs
-        user[position].hasDisconnectedOnce = true
     }
 
     fun followUser(user: User, position: Int) { }
@@ -168,6 +168,15 @@ class UserListViewModel : ViewModel() {
 
     private fun setIsConnectedStatus(isConnected: String) {
         isUserConnected.value = isConnected
+    }
+
+    fun onRefresh() {
+        _refreshing.value = true
+
+        // Simulate a delay and then stop the refreshing animation
+        Handler(Looper.getMainLooper()).postDelayed({
+            _refreshing.value = false
+        }, 2000)
     }
 
 }

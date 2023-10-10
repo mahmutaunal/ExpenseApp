@@ -31,15 +31,4 @@
         app:layout_constraintTop_toBottomOf="@+id/main_toolbar"
         app:navGraph="@navigation/nav_graph" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_add"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="24dp"
-        android:src="@drawable/ic_add"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:ignore="ContentDescription,ImageContrastCheck,SpeakableTextPresentCheck" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

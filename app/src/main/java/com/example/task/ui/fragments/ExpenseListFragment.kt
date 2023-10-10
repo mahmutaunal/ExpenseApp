@@ -34,6 +34,16 @@ class ExpenseListFragment : Fragment() {
             }
         }
 
+        // Observe the refreshing LiveData and trigger refresh on change
+        expenseListViewModel.refreshing.observe(viewLifecycleOwner) { isRefreshing ->
+            binding.swipeRefreshLayout.isRefreshing = isRefreshing
+        }
+
+        // Set the listener for swipe refresh
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            expenseListViewModel.onRefresh()
+        }
+
         return binding.root
     }
 

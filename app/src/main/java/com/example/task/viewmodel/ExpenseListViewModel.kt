@@ -3,13 +3,18 @@ package com.example.task.viewmodel
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.task.MyApplication
+import com.example.task.R
 import com.example.task.model.Expense
+import com.example.task.ui.fragments.ExpenseAddFragment
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -17,6 +22,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
+
 
 class ExpenseListViewModel : ViewModel() {
 
@@ -30,6 +36,10 @@ class ExpenseListViewModel : ViewModel() {
 
     // Variable to store the matched user's ID
     private val connectedUserId: MutableLiveData<String> = MutableLiveData()
+
+    private val _refreshing = MutableLiveData<Boolean>()
+    val refreshing: LiveData<Boolean>
+        get() = _refreshing
 
     private val database: FirebaseDatabase = FirebaseDatabase.getInstance()
     private val expensesRef = database.getReference("Expenses")
@@ -149,6 +159,23 @@ class ExpenseListViewModel : ViewModel() {
         } else {
             MyApplication.showToast("Invalid location!")
         }
+    }
+
+    fun openExpenseAddFragment(context: Context) {
+        val expenseAddFragment = ExpenseAddFragment()
+        (context as AppCompatActivity).supportFragmentManager.beginTransaction()
+            .replace(R.id.nav_host_fragment, expenseAddFragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
+    fun onRefresh() {
+        _refreshing.value = true
+
+        // Simulate a delay and then stop the refreshing animation
+        Handler(Looper.getMainLooper()).postDelayed({
+            _refreshing.value = false
+        }, 2000)
     }
 
 }

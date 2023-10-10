@@ -35,6 +35,16 @@ class UserListFragment : Fragment() {
             }
         }
 
+        // Observe the refreshing LiveData and trigger refresh on change
+        userListViewModel.refreshing.observe(viewLifecycleOwner) { isRefreshing ->
+            binding.swipeRefreshLayout.isRefreshing = isRefreshing
+        }
+
+        // Set the listener for swipe refresh
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            userListViewModel.onRefresh()
+        }
+
         return binding.root
     }
 
