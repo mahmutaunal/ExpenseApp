@@ -35,6 +35,9 @@ class UserListViewModel : ViewModel() {
     val isLoading: LiveData<Boolean>
         get() = _isLoading
 
+    private val _data: MutableLiveData<String> = MutableLiveData()
+    val data: LiveData<String> get() = _data
+
     private val usersRef = FirebaseDatabase.getInstance().getReference("Users")
 
     init {
@@ -65,8 +68,13 @@ class UserListViewModel : ViewModel() {
                         if (userId != null) {
                             if (userId != uid) {
                                 val user = snapshot.getValue(User::class.java)
-                                user?.let {
-                                    users.add(it)
+                                if (user == null) {
+                                    _data.value = "There is no user to list!"
+                                } else {
+                                    user.let {
+                                        users.add(it)
+                                        _data.value = ""
+                                    }
                                 }
                             }
                         }

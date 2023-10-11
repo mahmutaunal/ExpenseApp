@@ -45,6 +45,9 @@ class ExpenseListViewModel : ViewModel() {
     val isLoading: LiveData<Boolean>
         get() = _isLoading
 
+    private val _data: MutableLiveData<String> = MutableLiveData()
+    val data: LiveData<String> get() = _data
+
     private val database: FirebaseDatabase = FirebaseDatabase.getInstance()
     private val expensesRef = database.getReference("Expenses")
     private val usersRef = database.getReference("Users")
@@ -72,8 +75,13 @@ class ExpenseListViewModel : ViewModel() {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     for (snapshot in dataSnapshot.children) {
                         val expense = snapshot.getValue(Expense::class.java)
-                        expense?.let {
-                            expenses.add(it)
+                        if (expense!!.category.isEmpty()) {
+                            _data.value = "There is no expense to list!"
+                        } else {
+                            expense.let {
+                                expenses.add(it)
+                                _data.value = ""
+                            }
                         }
                     }
 
@@ -106,8 +114,13 @@ class ExpenseListViewModel : ViewModel() {
                         override fun onDataChange(dataSnapshot: DataSnapshot) {
                             for (snapshot in dataSnapshot.children) {
                                 val expense = snapshot.getValue(Expense::class.java)
-                                expense?.let {
-                                    expenses.add(it)
+                                if (expense!!.category.isEmpty()) {
+                                    _data.value = "There is no expense to list!"
+                                } else {
+                                    expense.let {
+                                        expenses.add(it)
+                                        _data.value = ""
+                                    }
                                 }
                             }
 
