@@ -5,10 +5,12 @@ import android.content.Intent
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.task.MyApplication
 import com.example.task.ui.MainActivity
 import com.example.task.ui.RegisterActivity
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 
 class LoginViewModel : ViewModel() {
 
@@ -36,22 +38,24 @@ class LoginViewModel : ViewModel() {
 
         _isLoading.value = true
 
-        FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                _isLoading.value = false
+        viewModelScope.launch {
+            FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener { task ->
+                    _isLoading.value = false
 
-                if (task.isSuccessful) {
-                    // Login successful, start MainActivity
-                    MyApplication.showToast("Login successful.")
+                    if (task.isSuccessful) {
+                        // Login successful, start MainActivity
+                        MyApplication.showToast("Login successful.")
 
-                    val intent = Intent(context.applicationContext, MainActivity::class.java)
-                    context.startActivity(intent)
-                    requestFinishActivity()
-                } else {
-                    // Login failed
-                    MyApplication.showToast("Authentication failed.")
+                        val intent = Intent(context.applicationContext, MainActivity::class.java)
+                        context.startActivity(intent)
+                        requestFinishActivity()
+                    } else {
+                        // Login failed
+                        MyApplication.showToast("Authentication failed.")
+                    }
                 }
-            }
+        }
     }
 
     // Open registerActivity

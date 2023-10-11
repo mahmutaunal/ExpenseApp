@@ -5,11 +5,13 @@ import android.content.Intent
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.task.MyApplication
 import com.example.task.ui.MainActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import kotlinx.coroutines.launch
 
 class RegisterViewModel : ViewModel() {
 
@@ -40,26 +42,28 @@ class RegisterViewModel : ViewModel() {
 
         _isLoading.value = true
 
-        FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                _isLoading.value = false
+        viewModelScope.launch {
+            FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener { task ->
+                    _isLoading.value = false
 
-                if (task.isSuccessful) {
-                    // Registration successful, start MainActivity
-                    // User successfully registered, add information to Firebase Realtime Database
-                    val userId = FirebaseAuth.getInstance().currentUser?.uid
-                    saveUserData(userId!!, email, false, "")
+                    if (task.isSuccessful) {
+                        // Registration successful, start MainActivity
+                        // User successfully registered, add information to Firebase Realtime Database
+                        val userId = FirebaseAuth.getInstance().currentUser?.uid
+                        saveUserData(userId!!, email, false, "")
 
-                    MyApplication.showToast("Account created.")
+                        MyApplication.showToast("Account created.")
 
-                    val intent = Intent(context.applicationContext, MainActivity::class.java)
-                    context.startActivity(intent)
-                    requestFinishActivity()
-                } else {
-                    // Registration failed.
-                    MyApplication.showToast("Account creating failed.")
+                        val intent = Intent(context.applicationContext, MainActivity::class.java)
+                        context.startActivity(intent)
+                        requestFinishActivity()
+                    } else {
+                        // Registration failed.
+                        MyApplication.showToast("Account creating failed.")
+                    }
                 }
-            }
+        }
     }
 
     private fun saveUserData(

@@ -29,6 +29,11 @@ class UserListFragment : Fragment() {
         binding.viewModel = userListViewModel
         binding.lifecycleOwner = this
 
+        // Update progress bar visibility with LiveData
+        userListViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        }
+
         userListViewModel.userList.observe(viewLifecycleOwner) { users ->
             users?.let {
                 userAdapter.setData(it)

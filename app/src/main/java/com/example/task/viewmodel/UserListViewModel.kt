@@ -31,6 +31,10 @@ class UserListViewModel : ViewModel() {
     val refreshing: LiveData<Boolean>
         get() = _refreshing
 
+    private val _isLoading = MutableLiveData(false)
+    val isLoading: LiveData<Boolean>
+        get() = _isLoading
+
     private val usersRef = FirebaseDatabase.getInstance().getReference("Users")
 
     init {
@@ -38,6 +42,8 @@ class UserListViewModel : ViewModel() {
     }
 
     private fun loadUsers() {
+        _isLoading.value = true
+
         //get current userId
         var uid: String? = null
         val user = Firebase.auth.currentUser
@@ -47,6 +53,8 @@ class UserListViewModel : ViewModel() {
 
         // Get all registered users data from Firebase
         viewModelScope.launch {
+            _isLoading.value = false
+
             usersRef.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     val users = mutableListOf<User>()

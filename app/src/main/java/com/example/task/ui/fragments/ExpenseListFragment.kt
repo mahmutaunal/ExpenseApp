@@ -28,6 +28,11 @@ class ExpenseListFragment : Fragment() {
         binding.viewModel = expenseListViewModel
         binding.lifecycleOwner = this
 
+        // Update progress bar visibility with LiveData
+        expenseListViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        }
+
         expenseListViewModel.expenseList.observe(viewLifecycleOwner) { expenses ->
             expenses?.let {
                 expenseAdapter.setData(it)

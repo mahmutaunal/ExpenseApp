@@ -41,6 +41,10 @@ class ExpenseListViewModel : ViewModel() {
     val refreshing: LiveData<Boolean>
         get() = _refreshing
 
+    private val _isLoading = MutableLiveData(false)
+    val isLoading: LiveData<Boolean>
+        get() = _isLoading
+
     private val database: FirebaseDatabase = FirebaseDatabase.getInstance()
     private val expensesRef = database.getReference("Expenses")
     private val usersRef = database.getReference("Users")
@@ -51,6 +55,8 @@ class ExpenseListViewModel : ViewModel() {
 
 
     private fun loadExpensesForCurrentUser() {
+        _isLoading.value = true
+
         // Get current userId
         var uid: String? = null
         val user = Firebase.auth.currentUser
@@ -60,6 +66,8 @@ class ExpenseListViewModel : ViewModel() {
 
         // Get All expenses data from Firebase for current user
         viewModelScope.launch {
+            _isLoading.value = false
+
             expensesRef.child(uid!!).addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     for (snapshot in dataSnapshot.children) {

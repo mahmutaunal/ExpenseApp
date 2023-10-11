@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import com.example.task.R
 import com.example.task.databinding.ActivityMainBinding
 import com.example.task.ui.fragments.ExpenseListFragment
@@ -32,7 +33,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.logout_item) {
-            logout()
+            showLogoutConfirmationDialog()
         } else if (item.itemId == R.id.users_item) {
             openUsersFragment()
         }
@@ -52,6 +53,22 @@ class MainActivity : AppCompatActivity() {
             .replace(R.id.nav_host_fragment, userListFragment)
             .addToBackStack(null)
             .commit()
+    }
+
+    private fun showLogoutConfirmationDialog() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Log Out")
+            .setMessage("Are you sure you want to log out?")
+            .setPositiveButton("Logout") { _, _ ->
+                // Actions when the user clicks Yes
+                logout()
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                // Actions to take when the user clicks Cancel
+                dialog.dismiss()
+            }
+            .create()
+            .show()
     }
 
     private fun logout() {

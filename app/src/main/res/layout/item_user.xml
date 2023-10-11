@@ -43,7 +43,7 @@
                 android:text="@{user.email}"
                 android:textSize="18sp"
                 tools:ignore="TouchTargetSizeCheck,DuplicateSpeakableTextCheck"
-                tools:text="Location" />
+                tools:text="Email" />
 
             <ImageView
                 android:id="@+id/linked_iv"
