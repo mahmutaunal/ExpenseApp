@@ -2,15 +2,18 @@ package com.example.task.viewmodel
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.task.MyApplication
+import com.example.task.service.FirebaseService
 import com.example.task.ui.MainActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.launch
 
 class RegisterViewModel : ViewModel() {
@@ -30,6 +33,8 @@ class RegisterViewModel : ViewModel() {
     var email: String = ""
     var password: String = ""
 
+    private var recipientToken: String = ""
+
     private lateinit var database: FirebaseDatabase
     private lateinit var usersRef: DatabaseReference
 
@@ -43,34 +48,46 @@ class RegisterViewModel : ViewModel() {
         _isLoading.value = true
 
         viewModelScope.launch {
-            FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener { task ->
-                    _isLoading.value = false
+            try {
+                // Await for getToken to complete
+                setToken(context)
 
-                    if (task.isSuccessful) {
-                        // Registration successful, start MainActivity
-                        // User successfully registered, add information to Firebase Realtime Database
-                        val userId = FirebaseAuth.getInstance().currentUser?.uid
-                        saveUserData(userId!!, email, false, "")
+                // This part will be executed after getToken has completed
+                FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener { task ->
+                        _isLoading.value = false
 
-                        MyApplication.showToast("Account created.")
+                        if (task.isSuccessful) {
+                            // Registration successful, start MainActivity
+                            // User successfully registered, add information to Firebase Realtime Database
+                            val userId = FirebaseAuth.getInstance().currentUser?.uid
+                            saveUserData(userId!!, email, recipientToken, false, "", false, "")
 
-                        val intent = Intent(context.applicationContext, MainActivity::class.java)
-                        context.startActivity(intent)
-                        requestFinishActivity()
-                    } else {
-                        // Registration failed.
-                        MyApplication.showToast("Account creating failed.")
+                            MyApplication.showToast("Account created.")
+
+                            val intent = Intent(context.applicationContext, MainActivity::class.java)
+                            context.startActivity(intent)
+                            requestFinishActivity()
+                        } else {
+                            // Registration failed.
+                            MyApplication.showToast("Account creating failed.")
+                        }
                     }
-                }
+            } catch (e: Exception) {
+                _isLoading.value = false
+                MyApplication.showToast("Token retrieval failed.")
+            }
         }
     }
 
     private fun saveUserData(
         userId: String,
         email: String,
+        token: String,
         isConnected: Boolean,
-        connectedUserId: String?
+        connectedUserId: String?,
+        isFollowing: Boolean,
+        followingUserId: String?
     ) {
         database = FirebaseDatabase.getInstance()
         usersRef = database.getReference("Users")
@@ -78,10 +95,24 @@ class RegisterViewModel : ViewModel() {
         val user = HashMap<String, Any>()
         user["userId"] = userId
         user["email"] = email
+        user["token"] = token
         user["isConnected"] = isConnected
         user["connectedUserId"] = connectedUserId.orEmpty()
+        user["isFollowing"] = isFollowing
+        user["followingUserId"] = followingUserId.orEmpty()
 
         usersRef.child(userId).setValue(user)
+    }
+
+    private fun setToken(context: Context) {
+        FirebaseService.sharedPref = context.getSharedPreferences("sharedPref", Context.MODE_PRIVATE)
+        FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
+            FirebaseService.token = token
+            recipientToken = token
+
+            Log.d("TokenDebug", "Token obtained: $token")
+        }
+        FirebaseMessaging.getInstance().subscribeToTopic("/topics/myTopic")
     }
 
     private fun setErrorMessage(message: String) {

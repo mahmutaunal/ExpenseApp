@@ -10,12 +10,17 @@ import androidx.lifecycle.viewModelScope
 import com.example.task.MyApplication
 import com.example.task.adapter.UserAdapter
 import com.example.task.model.User
+import com.example.task.model.notification.NotificationData
+import com.example.task.model.notification.PushNotification
+import com.example.task.util.RetrofitInstance
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class UserListViewModel : ViewModel() {
@@ -157,7 +162,71 @@ class UserListViewModel : ViewModel() {
         user[position].isConnected = false
     }
 
-    fun followUser(user: User, position: Int) { }
+    fun followUser(user: List<User>, position: Int) {
+        //get current userId
+        var uid: String? = null
+        val currentUser = Firebase.auth.currentUser
+        currentUser?.let {
+            uid = it.uid
+        }
+
+        // Firebase database reference
+        val database = FirebaseDatabase.getInstance()
+        val usersRef = database.getReference("Users")
+
+        // Current User
+        val currentUserRef = usersRef.child(uid.toString())
+
+        // Other user whose followed user ID will be obtained
+        val otherUserRef = usersRef.child(user[position].userId)
+
+        // Follow operations for current user
+        currentUserRef.child("isFollowing").setValue(true)
+        currentUserRef.child("followingUserId").setValue(otherUserRef.key)
+
+        // Update the information of the person the following user is followed to
+        otherUserRef.child("isFollowing").setValue(true)
+        otherUserRef.child("followingUserId").setValue(currentUserRef.key)
+
+        // Show successful message
+        MyApplication.showToast("Being followed")
+
+        // Update followedUser when connecting occurs
+        user[position].isFollowing = true
+    }
+
+    fun unFollowUser(user: List<User>, position: Int) {
+        //get current userId
+        var uid: String? = null
+        val currentUser = Firebase.auth.currentUser
+        currentUser?.let {
+            uid = it.uid
+        }
+
+        // Firebase database reference
+        val database = FirebaseDatabase.getInstance()
+        val usersRef = database.getReference("Users")
+
+        // Current User
+        val currentUserRef = usersRef.child(uid.toString())
+
+        // Other user whose unFollow user ID will be obtained
+        val otherUserRef = usersRef.child(user[position].userId)
+
+        // unFollowed operations for current user
+        currentUserRef.child("isFollowing").setValue(false)
+        currentUserRef.child("followingUserId").setValue(otherUserRef.key)
+
+        // Update the information of the person the unFollowing user is followed to
+        otherUserRef.child("isFollowing").setValue(false)
+        otherUserRef.child("followingUserId").setValue(currentUserRef.key)
+
+        // Show successful message
+        MyApplication.showToast("Being followed")
+
+        // Update followedUser when connecting occurs
+        user[position].isFollowing = false
+    }
 
     fun getIsConnectedStatus(callback: UserAdapter.IsConnectedCallback) {
         //get current userId
@@ -194,5 +263,28 @@ class UserListViewModel : ViewModel() {
             _refreshing.value = false
         }, 2000)
     }
+
+    fun sendPushNotification() {
+        PushNotification(
+            NotificationData("Task", "User wants to follow you."),
+            "/topics/myTopic"
+        ).also {
+            sendNotification(it)
+        }
+    }
+
+    private fun sendNotification(notification: PushNotification) =
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = RetrofitInstance.api.postNotification(notification)
+                if (response.isSuccessful) {
+                    Log.d("Notification", "Response: $response")
+                } else {
+                    Log.e("Notification Error", response.errorBody().toString())
+                }
+            } catch (e: Exception) {
+                Log.e("Notification Error", e.toString())
+            }
+        }
 
 }
