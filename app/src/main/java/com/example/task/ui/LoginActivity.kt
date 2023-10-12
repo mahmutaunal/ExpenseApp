@@ -21,8 +21,10 @@ class LoginActivity : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(binding.loginToolbar)
 
+        // Initialize the Firebase authentication instance
         auth = FirebaseAuth.getInstance()
 
+        // Set ViewModel and lifecycle owner for binding in the layout
         binding.viewModel = loginViewModel
         binding.lifecycleOwner = this
 
@@ -42,6 +44,7 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
+    // This function is called when the activity is about to become visible
     public override fun onStart() {
         super.onStart()
         // Check if user is signed in (non-null) and open MainActivity() accordingly.

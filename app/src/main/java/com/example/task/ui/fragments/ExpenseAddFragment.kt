@@ -29,16 +29,20 @@ class ExpenseAddFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentExpenseAddBinding.inflate(inflater, container, false)
+
+        // Set ViewModel and lifecycle owner for binding in the layout
+        binding.viewModel = expenseAddViewModel
         binding.lifecycleOwner = this
 
-        binding.viewModel = expenseAddViewModel
-
+        // Setup the category dropdown
         setupCategoryDropdown()
 
+        // Handle adding an expense when fabDone is clicked
         binding.fabDone.setOnClickListener {
             expenseAddViewModel.addExpense()
         }
 
+        // Observe a LiveData to navigate to the expense list fragment
         expenseAddViewModel.navigateToExpenseListFragment.observe(viewLifecycleOwner) { shouldNavigate ->
             if (shouldNavigate) {
                 openExpenseListFragment()
@@ -46,6 +50,7 @@ class ExpenseAddFragment : Fragment() {
             }
         }
 
+        // Handle location permission and getting the current location when currentLocationTv is clicked
         binding.currentLocationTv.setOnClickListener {
             checkLocationPermissionAndGetCurrentLocation()
         }

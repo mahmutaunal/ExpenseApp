@@ -50,6 +50,7 @@ class ExpenseAdapter : RecyclerView.Adapter<ExpenseAdapter.ViewHolder>() {
         return expenseList.size
     }
 
+    // Function to update the expenseList with a new list of Expense objects and notify the adapter of the change
     @SuppressLint("NotifyDataSetChanged")
     fun setData(newExpenseList: List<Expense>) {
         expenseList = newExpenseList

@@ -1,6 +1,6 @@
 package com.example.task.model
 
-enum class Action {
+enum class DialogAction {
     CONNECT,
     DISCONNECT,
     FOLLOW,

@@ -23,31 +23,34 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 
-
 class ExpenseListViewModel : ViewModel() {
 
+    // LiveData for expense list and related properties
     private val _expenseList = MutableLiveData<List<Expense>>()
     val expenseList: LiveData<List<Expense>>
         get() = _expenseList
 
     private var location: String? = null
-
     private var expenses = mutableListOf<Expense>()
 
     // Variable to store the matched user's ID
     private val connectedUserId: MutableLiveData<String> = MutableLiveData()
 
+    // LiveData for refreshing indicators
     private val _refreshing = MutableLiveData<Boolean>()
     val refreshing: LiveData<Boolean>
         get() = _refreshing
 
+    // LiveData for loading indicators
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean>
         get() = _isLoading
 
+    // LiveData for the message to be shown if the expense list is empty
     private val _data: MutableLiveData<String> = MutableLiveData()
     val data: LiveData<String> get() = _data
 
+    // Database references
     private val database: FirebaseDatabase = FirebaseDatabase.getInstance()
     private val expensesRef = database.getReference("Expenses")
     private val usersRef = database.getReference("Users")
@@ -56,7 +59,7 @@ class ExpenseListViewModel : ViewModel() {
         loadExpensesForCurrentUser()
     }
 
-
+    // Function to load expenses for the current user
     private fun loadExpensesForCurrentUser() {
         _isLoading.value = true
 
@@ -99,12 +102,14 @@ class ExpenseListViewModel : ViewModel() {
         getConnectedUserId()
     }
 
+    // Functions to handle connected user and their expenses
     fun setConnectedUserId(userId: String) {
         connectedUserId.value = userId
         // Pull data from Firebase when Connected User ID changes
         loadExpenseForConnectedUser(userId)
     }
 
+    // Function to load expenses for the connected user
     private fun loadExpenseForConnectedUser(userId: String) {
         // Get All expenses data from Firebase for connected user
         if (userId != "" || userId != null) {
@@ -135,6 +140,7 @@ class ExpenseListViewModel : ViewModel() {
         }
     }
 
+    // Functions to handle connected user and their expenses
     private fun getConnectedUserId() {
         //get current userId
         var uid: String? = null
@@ -157,6 +163,7 @@ class ExpenseListViewModel : ViewModel() {
         connectedUserIdRef.addValueEventListener(connectedUserIdListener)
     }
 
+    // Function to handle location item click
     fun onLocationItemClick(context: Context, position: Int) {
         // Get clicked position
         location = _expenseList.value!![position].location
@@ -182,6 +189,7 @@ class ExpenseListViewModel : ViewModel() {
         }
     }
 
+    // Functions to handle navigation and UI interactions
     fun openExpenseAddFragment(context: Context) {
         val expenseAddFragment = ExpenseAddFragment()
         (context as AppCompatActivity).supportFragmentManager.beginTransaction()

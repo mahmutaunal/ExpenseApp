@@ -14,21 +14,26 @@ import kotlinx.coroutines.launch
 
 class LoginViewModel : ViewModel() {
 
+    // LiveData for error message
     private val _errorMessage = MutableLiveData<String>()
     val errorMessage: LiveData<String>
         get() = _errorMessage
 
+    // LiveData for loading indicator
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean>
         get() = _isLoading
 
+    // LiveData for activity termination request
     private val _shouldFinishActivity = MutableLiveData<Boolean>()
     val shouldFinishActivity: LiveData<Boolean>
         get() = _shouldFinishActivity
 
+    // Variables for email and password
     var email: String = ""
     var password: String = ""
 
+    // Function to handle login click
     fun onLoginClick(context: Context) {
         // If email or password is null, warn the user and do not perform the action
         if (email.isEmpty() || password.isEmpty()) {
@@ -58,12 +63,13 @@ class LoginViewModel : ViewModel() {
         }
     }
 
-    // Open registerActivity
+    // Function to handle register click
     fun onRegisterClick(context: Context) {
         val intent = Intent(context.applicationContext, RegisterActivity::class.java)
         context.startActivity(intent)
     }
 
+    // Functions to handle error message
     private fun setErrorMessage(message: String) {
         _errorMessage.value = message
     }

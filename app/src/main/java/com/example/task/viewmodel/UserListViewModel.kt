@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 
 class UserListViewModel : ViewModel() {
 
+    // LiveData for the list of users
     private val _userList = MutableLiveData<List<User>>()
     val userList: LiveData<List<User>>
         get() = _userList
@@ -32,27 +33,32 @@ class UserListViewModel : ViewModel() {
     // Variable to store the matched user's isConnect status
     private val isUserConnected = MutableLiveData<String>()
 
+    // LiveData for the refreshing state
     private val _refreshing = MutableLiveData<Boolean>()
     val refreshing: LiveData<Boolean>
         get() = _refreshing
 
+    // LiveData for the loading state
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean>
         get() = _isLoading
 
+    // LiveData for the message to be shown if the expense list is empty
     private val _data: MutableLiveData<String> = MutableLiveData()
     val data: LiveData<String> get() = _data
 
+    // Firebase database reference for users
     private val usersRef = FirebaseDatabase.getInstance().getReference("Users")
 
     init {
         loadUsers()
     }
 
+    // Load users from Firebase and update the user list LiveData
     private fun loadUsers() {
         _isLoading.value = true
 
-        //get current userId
+        // Get current userId
         var uid: String? = null
         val user = Firebase.auth.currentUser
         user?.let {
@@ -96,6 +102,7 @@ class UserListViewModel : ViewModel() {
         }
     }
 
+    // Functions to handle connecting
     fun connectUser(user: List<User>, position: Int) {
         //get current userId
         var uid: String? = null
@@ -129,6 +136,7 @@ class UserListViewModel : ViewModel() {
         user[position].isConnected = true
     }
 
+    // Functions to handle disconnecting
     fun disconnectUser(user: List<User>, position: Int) {
         //get current userId
         var uid: String? = null
@@ -162,6 +170,7 @@ class UserListViewModel : ViewModel() {
         user[position].isConnected = false
     }
 
+    // Functions to handle following
     fun followUser(user: List<User>, position: Int) {
         //get current userId
         var uid: String? = null
@@ -195,6 +204,7 @@ class UserListViewModel : ViewModel() {
         user[position].isFollowing = true
     }
 
+    // Functions to handle unfollowing
     fun unFollowUser(user: List<User>, position: Int) {
         //get current userId
         var uid: String? = null
@@ -228,6 +238,7 @@ class UserListViewModel : ViewModel() {
         user[position].isFollowing = false
     }
 
+    // Functions to handle getting the user's connected status and sending push notifications
     fun getIsConnectedStatus(callback: UserAdapter.IsConnectedCallback) {
         //get current userId
         var uid: String? = null

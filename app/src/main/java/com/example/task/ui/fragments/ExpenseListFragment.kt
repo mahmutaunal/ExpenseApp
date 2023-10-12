@@ -23,16 +23,19 @@ class ExpenseListFragment : Fragment() {
     ): View {
         binding = FragmentExpenseListBinding.inflate(inflater, container, false)
 
-        setupRecyclerView()
-
+        // Set ViewModel and lifecycle owner for binding in the layout
         binding.viewModel = expenseListViewModel
         binding.lifecycleOwner = this
+
+        // Setup RecyclerView and its adapter
+        setupRecyclerView()
 
         // Update progress bar visibility with LiveData
         expenseListViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
             binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
         }
 
+        // Observe expenseList LiveData and update the adapter with expense data
         expenseListViewModel.expenseList.observe(viewLifecycleOwner) { expenses ->
             expenses?.let {
                 expenseAdapter.setData(it)

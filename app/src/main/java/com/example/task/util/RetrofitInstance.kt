@@ -19,4 +19,5 @@ class RetrofitInstance {
             retrofit.create(NotificationAPI::class.java)
         }
     }
+
 }

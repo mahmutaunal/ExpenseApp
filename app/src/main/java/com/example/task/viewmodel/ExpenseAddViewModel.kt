@@ -22,45 +22,56 @@ import kotlinx.coroutines.launch
 
 class ExpenseAddViewModel : ViewModel() {
 
+    // LiveData for error message
     private val _errorMessage = MutableLiveData<String>()
     val errorMessage: LiveData<String>
         get() = _errorMessage
 
+    // LiveData for predefined categories
     private val _categories = MutableLiveData<List<String>>()
     private val categories: LiveData<List<String>> get() = _categories
 
+    // LiveData for selected category
     private val _selectedCategory = MutableLiveData<String>()
     val selectedCategory: LiveData<String> get() = _selectedCategory
 
+    // LiveData for selected location
     private val _location = MutableLiveData<String>()
     val location: LiveData<String>
         get() = _location
 
+    // Other properties related to expense details
     var amount: String = ""
 
+    // Firebase Realtime Database reference
     private val expenseRef = FirebaseDatabase.getInstance().getReference("Expenses")
 
+    // FusedLocationProviderClient for getting device location
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     init {
         setPredefinedCategories()
     }
 
+    // Function to set predefined categories
     private fun setPredefinedCategories() {
         val predefinedCategories = listOf("Fuel", "Shopping")
         _categories.value = predefinedCategories
     }
 
+    // Function to get ArrayAdapter for categories
     fun getCategoriesAdapter(context: Context): ArrayAdapter<String> {
         val adapter = ArrayAdapter(context, R.layout.dropdown_item, categories.value!!)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         return adapter
     }
 
+    // Functions to handle selected category and add expense
     fun setSelectedCategory(category: String) {
         _selectedCategory.value = category
     }
 
+    // Function to add an expense
     fun addExpense() {
         val expenseAmount = amount
         val expenseCategory = selectedCategory.value
@@ -120,6 +131,7 @@ class ExpenseAddViewModel : ViewModel() {
         }
     }
 
+    // Functions to handle location and save expense
     fun getCurrentLocationAndSaveExpense(context: Context) {
         // Initialize
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
@@ -146,6 +158,7 @@ class ExpenseAddViewModel : ViewModel() {
             }
     }
 
+    // Save current location in a variable
     private fun saveCurrentLocation(
         currentLocationLatitude: String,
         currentLocationLongitude: String
@@ -153,7 +166,7 @@ class ExpenseAddViewModel : ViewModel() {
         _location.value = "$currentLocationLatitude , $currentLocationLongitude"
     }
 
-    // Used to open ExpenseListFragment after expense is added
+    // Functions to handle navigation to ExpenseListFragment
     private val _navigateToExpenseListFragment = MutableLiveData<Boolean>()
     val navigateToExpenseListFragment: LiveData<Boolean>
         get() = _navigateToExpenseListFragment
@@ -166,6 +179,7 @@ class ExpenseAddViewModel : ViewModel() {
         _navigateToExpenseListFragment.value = true
     }
 
+    // Function to set error message
     private fun setErrorMessage(message: String) {
         _errorMessage.value = message
     }

@@ -34,28 +34,39 @@ class FirebaseService : FirebaseMessagingService() {
             }
     }
 
+    // Override function that gets called when a new FCM token is generated
     override fun onNewToken(newToken: String) {
         super.onNewToken(newToken)
         token = newToken
     }
 
+    // Override function that gets called when a new FCM message is received
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
 
+        // Create an Intent to launch the MainActivity when notification is tapped
         val intent = Intent(this, MainActivity::class.java)
+
+        // Get the notification manager from the system
         val notificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        // Generate a unique notification ID
         val notificationID = Random.nextInt()
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        // Create a notification channel for Android Oreo and above
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel(notificationManager)
         }
 
+        // Create a PendingIntent to open the MainActivity when the notification is tapped
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         val pendingIntent = PendingIntent.getActivity(
             this, 0, intent,
             FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
         )
+
+        // Build the notification using NotificationCompat.Builder
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(message.data["title"])
             .setContentText(message.data["message"])
@@ -64,9 +75,11 @@ class FirebaseService : FirebaseMessagingService() {
             .setContentIntent(pendingIntent)
             .build()
 
+        // Show the notification using the notification manager
         notificationManager.notify(notificationID, notification)
     }
 
+    // Function to create a notification channel for Android Oreo and above
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotificationChannel(notificationManager: NotificationManager) {
         val channelName = "channelName"

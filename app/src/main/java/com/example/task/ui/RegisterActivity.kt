@@ -17,9 +17,12 @@ class RegisterActivity : AppCompatActivity() {
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.registerToolbar)
+
+        // Configure the ActionBar
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
 
+        // Set the ViewModel and lifecycle owner for data binding
         binding.viewModel = registerViewModel
         binding.lifecycleOwner = this
 

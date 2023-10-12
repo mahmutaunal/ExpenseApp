@@ -18,26 +18,33 @@ import kotlinx.coroutines.launch
 
 class RegisterViewModel : ViewModel() {
 
+    // LiveData for error message
     private val _errorMessage = MutableLiveData<String>()
     val errorMessage: LiveData<String>
         get() = _errorMessage
 
+    // LiveData loading indicator
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean>
         get() = _isLoading
 
+    // LiveData for activity termination request
     private val _shouldFinishActivity = MutableLiveData<Boolean>()
     val shouldFinishActivity: LiveData<Boolean>
         get() = _shouldFinishActivity
 
+    // Variables for email, password
     var email: String = ""
     var password: String = ""
 
+    // Variables for recipient token
     private var recipientToken: String = ""
 
+    // Firebase database references
     private lateinit var database: FirebaseDatabase
     private lateinit var usersRef: DatabaseReference
 
+    // Function to handle register click
     fun onRegisterClick(context: Context) {
         // If email or password is null, warn the user and do not perform the action
         if (email.isEmpty() || password.isEmpty()) {
@@ -65,7 +72,8 @@ class RegisterViewModel : ViewModel() {
 
                             MyApplication.showToast("Account created.")
 
-                            val intent = Intent(context.applicationContext, MainActivity::class.java)
+                            val intent =
+                                Intent(context.applicationContext, MainActivity::class.java)
                             context.startActivity(intent)
                             requestFinishActivity()
                         } else {
@@ -80,6 +88,7 @@ class RegisterViewModel : ViewModel() {
         }
     }
 
+    // Function to save user data to Firebase Realtime Database
     private fun saveUserData(
         userId: String,
         email: String,
@@ -104,8 +113,10 @@ class RegisterViewModel : ViewModel() {
         usersRef.child(userId).setValue(user)
     }
 
+    // Function to set the recipient token
     private fun setToken(context: Context) {
-        FirebaseService.sharedPref = context.getSharedPreferences("sharedPref", Context.MODE_PRIVATE)
+        FirebaseService.sharedPref =
+            context.getSharedPreferences("sharedPref", Context.MODE_PRIVATE)
         FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
             FirebaseService.token = token
             recipientToken = token
@@ -115,6 +126,7 @@ class RegisterViewModel : ViewModel() {
         FirebaseMessaging.getInstance().subscribeToTopic("/topics/myTopic")
     }
 
+    // Functions to handle error message
     private fun setErrorMessage(message: String) {
         _errorMessage.value = message
     }

@@ -23,23 +23,29 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(binding.mainToolbar)
 
+        // Call a function to set up the ExpenseListFragment
         setupListExpenseFragment()
     }
 
+    // This function is called to create the options menu
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.main_toolbar_menu, menu)
         return true
     }
 
+    // This function is called when an item in the options menu is selected
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.logout_item) {
+            // Show a confirmation dialog for logout if the logout item is selected
             showLogoutConfirmationDialog()
         } else if (item.itemId == R.id.users_item) {
+            // Open the UserListFragment if the users item is selected
             openUsersFragment()
         }
         return super.onOptionsItemSelected(item)
     }
 
+    // Function to set up the ExpenseListFragment
     private fun setupListExpenseFragment() {
         val expenseListFragment = ExpenseListFragment()
         supportFragmentManager.beginTransaction()
@@ -47,6 +53,7 @@ class MainActivity : AppCompatActivity() {
             .commit()
     }
 
+    // Function to open the UserListFragment
     private fun openUsersFragment() {
         val userListFragment = UserListFragment()
         supportFragmentManager.beginTransaction()
@@ -55,6 +62,8 @@ class MainActivity : AppCompatActivity() {
             .commit()
     }
 
+    // Function to show a logout confirmation dialog
+    // Code to create and show a dialog asking the user to confirm logout
     private fun showLogoutConfirmationDialog() {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Log Out")
@@ -71,6 +80,8 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
+    // Function to handle logout
+    // Code to log out the user, show a toast, and navigate to the LoginActivity
     private fun logout() {
         FirebaseAuth.getInstance().signOut()
 

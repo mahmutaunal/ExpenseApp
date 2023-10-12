@@ -14,7 +14,7 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.task.adapter.UserAdapter
 import com.example.task.databinding.FragmentUserListBinding
-import com.example.task.model.Action
+import com.example.task.model.DialogAction
 import com.example.task.viewmodel.UserListViewModel
 
 class UserListFragment : Fragment() {
@@ -29,16 +29,19 @@ class UserListFragment : Fragment() {
     ): View {
         binding = FragmentUserListBinding.inflate(inflater, container, false)
 
-        setupRecyclerView()
-
+        // Set ViewModel and lifecycle owner for binding in the layout
         binding.viewModel = userListViewModel
         binding.lifecycleOwner = this
+
+        // Setup RecyclerView and its adapter
+        setupRecyclerView()
 
         // Update progress bar visibility with LiveData
         userListViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
             binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
         }
 
+        // Observe userList LiveData and update the adapter with user data
         userListViewModel.userList.observe(viewLifecycleOwner) { users ->
             users?.let {
                 userAdapter.setData(it)
@@ -62,12 +65,13 @@ class UserListFragment : Fragment() {
         // Creating and setting adapters for RecyclerView
         userAdapter = UserAdapter { user, action, position ->
             when (action) {
-                Action.CONNECT -> userListViewModel.connectUser(listOf(user), position)
-                Action.DISCONNECT -> userListViewModel.disconnectUser(listOf(user), position)
-                Action.FOLLOW -> checkNotificationPermission()
-                Action.UNFOLLOW -> checkNotificationPermission()
+                DialogAction.CONNECT -> userListViewModel.connectUser(listOf(user), position)
+                DialogAction.DISCONNECT -> userListViewModel.disconnectUser(listOf(user), position)
+                DialogAction.FOLLOW -> checkNotificationPermission()
+                DialogAction.UNFOLLOW -> checkNotificationPermission()
             }
         }
+
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = userAdapter
