@@ -80,21 +80,29 @@ class UserAdapter(private val onItemClickListener: (User, DialogAction, Int) -> 
         position: Int
     ) {
         // Depending on connection status, display different options
-        val actions = if (isConnected == "true") {
-            arrayOf("Disconnect", "Follow Live")
-        } else {
-            arrayOf("Connect", "Follow Live")
-        }
-
-        val builder = AlertDialog.Builder(context)
-        builder.setItems(actions) { dialog, which ->
-            when (which) {
-                0 -> onItemClickListener(user, DialogAction.DISCONNECT, position)
-                1 -> onItemClickListener(user, DialogAction.FOLLOW, position)
+        if (isConnected == "true") {
+            val actions = arrayOf("Disconnect", "Follow Live")
+            val builder = AlertDialog.Builder(context)
+            builder.setItems(actions) { dialog, which ->
+                when (which) {
+                    0 -> onItemClickListener(user, DialogAction.DISCONNECT, position)
+                    1 -> onItemClickListener(user, DialogAction.FOLLOW, position)
+                }
+                dialog.dismiss()
             }
-            dialog.dismiss()
+            builder.show()
+        } else {
+            val actions = arrayOf("Connect", "Follow Live")
+            val builder = AlertDialog.Builder(context)
+            builder.setItems(actions) { dialog, which ->
+                when (which) {
+                    0 -> onItemClickListener(user, DialogAction.CONNECT, position)
+                    1 -> onItemClickListener(user, DialogAction.FOLLOW, position)
+                }
+                dialog.dismiss()
+            }
+            builder.show()
         }
-        builder.show()
     }
 
     interface IsConnectedCallback {

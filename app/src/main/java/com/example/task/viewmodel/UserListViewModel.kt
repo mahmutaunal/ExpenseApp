@@ -119,7 +119,7 @@ class UserListViewModel : ViewModel() {
         val currentUserRef = usersRef.child(uid.toString())
 
         // Other user whose connected user ID will be obtained
-        val otherUserRef = usersRef.child(user[position].userId)
+        val otherUserRef = usersRef.child(user[0].userId)
 
         // Connection operations for current user
         currentUserRef.child("isConnected").setValue(true)
@@ -133,7 +133,7 @@ class UserListViewModel : ViewModel() {
         MyApplication.showToast("Connected")
 
         // Update connectedUser when connecting occurs
-        user[position].isConnected = true
+        user[0].isConnected = true
     }
 
     // Functions to handle disconnecting
@@ -153,7 +153,7 @@ class UserListViewModel : ViewModel() {
         val currentUserRef = usersRef.child(uid.toString())
 
         // Other user whose disconnected user ID will be obtained
-        val otherUserRef = usersRef.child(user[position].userId)
+        val otherUserRef = usersRef.child(user[0].userId)
 
         // Disconnection operations
         currentUserRef.child("isConnected").setValue(false)
@@ -167,7 +167,7 @@ class UserListViewModel : ViewModel() {
         MyApplication.showToast("Disconnected")
 
         // Update connectedUser when disconnecting occurs
-        user[position].isConnected = false
+        user[0].isConnected = false
     }
 
     // Functions to handle following
@@ -247,19 +247,21 @@ class UserListViewModel : ViewModel() {
             uid = it.uid
         }
 
-        val connectedUserIdRef = usersRef.child(uid!!).child("isConnected")
-        val connectedUserIdListener = object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                setIsConnectedStatus(dataSnapshot.value.toString())
-                callback.onIsCurrentUserConnectedFetched(dataSnapshot.value.toString())
+        viewModelScope.launch {
+            val connectedUserIdRef = usersRef.child(uid!!).child("isConnected")
+            val connectedUserIdListener = object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    setIsConnectedStatus(dataSnapshot.value.toString())
+                    callback.onIsCurrentUserConnectedFetched(dataSnapshot.value.toString())
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {
+                    Log.e("Connected User Id Error", databaseError.details)
+                }
             }
 
-            override fun onCancelled(databaseError: DatabaseError) {
-                Log.e("Connected User Id Error", databaseError.details)
-            }
+            connectedUserIdRef.addValueEventListener(connectedUserIdListener)
         }
-
-        connectedUserIdRef.addValueEventListener(connectedUserIdListener)
     }
 
     private fun setIsConnectedStatus(isConnected: String) {
