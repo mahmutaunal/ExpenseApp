@@ -205,6 +205,9 @@ class ExpenseListViewModel : ViewModel() {
         Handler(Looper.getMainLooper()).postDelayed({
             _refreshing.value = false
         }, 2000)
+
+        expenses.clear()
+        loadExpensesForCurrentUser()
     }
 
 }

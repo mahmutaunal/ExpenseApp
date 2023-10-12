@@ -157,11 +157,11 @@ class UserListViewModel : ViewModel() {
 
         // Disconnection operations
         currentUserRef.child("isConnected").setValue(false)
-        currentUserRef.child("connectedUserId").setValue(null)
+        currentUserRef.child("connectedUserId").setValue("")
 
         // Update the information of the person the connected user is disconnected to
         otherUserRef.child("isConnected").setValue(false)
-        otherUserRef.child("connectedUserId").setValue(null)
+        otherUserRef.child("connectedUserId").setValue("")
 
         // Show successful message
         MyApplication.showToast("Disconnected")
@@ -225,11 +225,11 @@ class UserListViewModel : ViewModel() {
 
         // unFollowed operations for current user
         currentUserRef.child("isFollowing").setValue(false)
-        currentUserRef.child("followingUserId").setValue(otherUserRef.key)
+        currentUserRef.child("followingUserId").setValue("")
 
         // Update the information of the person the unFollowing user is followed to
         otherUserRef.child("isFollowing").setValue(false)
-        otherUserRef.child("followingUserId").setValue(currentUserRef.key)
+        otherUserRef.child("followingUserId").setValue("")
 
         // Show successful message
         MyApplication.showToast("Being followed")
